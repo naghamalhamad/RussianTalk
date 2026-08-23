@@ -42,6 +42,7 @@ function BubbleWords({ line, dialogId, topicId, savedWords, onWordClick }) {
 export default function ChatPanel({ dialogId, flashcards, onSaveWord, onRemoveWord }) {
   const d = DIALOGS[dialogId];
   const [shownLines, setShownLines] = useState(() => new Set());
+  const [hoveredLine, setHoveredLine] = useState(null);
   const [popover, setPopover] = useState(null);
   const panelRef = useRef(null);
 
@@ -96,7 +97,12 @@ export default function ChatPanel({ dialogId, flashcards, onSaveWord, onRemoveWo
         <div className={`bubble-row ${line.side}`} key={li}>
           <div className="bubble-wrap">
             <div className="speaker-tag">{line.speaker}</div>
-            <div className="bubble" onClick={() => toggleTranslation(li)}>
+            <div
+              className="bubble"
+              onClick={() => toggleTranslation(li)}
+              onMouseEnter={() => setHoveredLine(li)}
+              onMouseLeave={() => setHoveredLine(null)}
+            >
               <BubbleWords
                 line={line}
                 dialogId={dialogId}
@@ -106,12 +112,12 @@ export default function ChatPanel({ dialogId, flashcards, onSaveWord, onRemoveWo
               />
             </div>
             {line.translit && <div className="translit">{line.translit}</div>}
-            <div className={`translation-line ${shownLines.has(li) ? 'shown' : ''}`}>{line.tr}</div>
+            <div className={`translation-line ${shownLines.has(li) || hoveredLine === li ? 'shown' : ''}`}>{line.tr}</div>
           </div>
         </div>
       ))}
 
-      <div className="hint-row">Tap a bubble to translate the sentence · tap a word to translate &amp; save it</div>
+      <div className="hint-row">Hover or tap a bubble to translate the sentence · tap a word to translate &amp; save it</div>
 
       {popover && (
         <div className="popover shown" style={{ top: popover.top, left: popover.left }}>
