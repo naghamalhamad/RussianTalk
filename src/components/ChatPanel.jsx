@@ -32,9 +32,9 @@ function BubbleWords({ line, dialogId, topicId, savedWords, onWordClick }) {
         key={i}
         className={`word ${savedWords.has(seg.text) ? 'saved' : ''}`}
         onClick={(e) => onWordClick(e, seg.text, seg.tr, dialogId, topicId)}
+        onMouseEnter={(e) => onWordClick(e, seg.text, seg.tr, dialogId, topicId)}
       >
         {seg.text}
-        <SpeakerButton text={seg.text} label={`Play "${seg.text}"`} className="word-speak-btn" />
       </span>
     ) : (
       <span key={i}>{seg.text}</span>
@@ -124,7 +124,7 @@ export default function ChatPanel({ dialogId, flashcards, onSaveWord, onRemoveWo
         </div>
       ))}
 
-      <div className="hint-row">Hover or tap a bubble to translate the sentence · tap a word to translate &amp; save it</div>
+      <div className="hint-row">Hover or tap a bubble to translate the sentence · hover or tap a word to hear, translate &amp; save it</div>
 
       {popover && (
         <div className="popover shown" style={{ top: popover.top, left: popover.left }}>

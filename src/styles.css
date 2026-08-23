@@ -212,10 +212,6 @@ main{flex:1; padding:24px 20px 60px;}
   border-bottom:1.5px dotted var(--amber);
   cursor:pointer; padding:0 1px; position:relative; border-radius:3px;
 }
-.word .word-speak-btn{
-  display:none; margin-left:2px; font-size:10px; vertical-align:middle;
-}
-.word:hover .word-speak-btn, .word:focus-within .word-speak-btn{ display:inline; }
 .word:hover, .word:focus-visible{ background:rgba(193,127,43,0.14); }
 .word.saved{ border-bottom-style:solid; border-bottom-color:var(--sage); }
 .translit{

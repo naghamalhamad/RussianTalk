@@ -143,13 +143,14 @@ How it's wired up:
   Russian.
 - `src/components/SpeakerButton.jsx` is the one reusable 🔊 button.
   Give it some text and a label, and it handles the rest.
-- It's used in three places in `ChatPanel.jsx`: next to each speaker's
-  name (reads the whole line), inline after each clickable word but
-  only revealed on hover (reads just that word), and inside the
-  word popup that already appears when you tap a word (this is the
-  version mobile users see, since there's no "hover" on a touchscreen
-  — tapping a word already opens that popup, so the speaker button
-  rides along with it instead of needing a separate gesture).
+- It's used in two places in `ChatPanel.jsx`: next to each speaker's
+  name (reads the whole line), and inside the little translation popup
+  that appears over a word (reads just that word). That popup opens
+  either by hovering the word (on a computer) or tapping it (on a
+  touchscreen, where there's no "hover") — either way, the same popup
+  shows the translation, the 🔊 button, and the "Save as flashcard"
+  button together, so you can hear a word before deciding to save it,
+  on any device, without a separate icon cluttering the sentence text.
 
 **An honest limitation, not a bug**: whether the audio actually sounds
 right depends on whether the visitor's own phone or computer has a
