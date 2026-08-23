@@ -183,8 +183,16 @@ main{flex:1; padding:24px 20px 60px;}
 .bubble-row.right{ justify-content:flex-end; }
 .speaker-tag{
   font-size:11px; color:var(--ink-soft); margin-bottom:4px; font-weight:700;
+  display:flex; align-items:center; gap:6px;
 }
+.bubble-row.right .speaker-tag{ justify-content:flex-end; }
 .bubble-wrap{ max-width:78%; }
+
+.speaker-btn{
+  border:none; background:none; cursor:pointer; padding:0; line-height:1;
+  font-size:12px; min-height:auto; opacity:.8;
+}
+.speaker-btn:hover{ opacity:1; }
 .bubble-row.right .bubble-wrap{ text-align:right; }
 .bubble{
   display:inline-block; text-align:left;
@@ -204,6 +212,10 @@ main{flex:1; padding:24px 20px 60px;}
   border-bottom:1.5px dotted var(--amber);
   cursor:pointer; padding:0 1px; position:relative; border-radius:3px;
 }
+.word .word-speak-btn{
+  display:none; margin-left:2px; font-size:10px; vertical-align:middle;
+}
+.word:hover .word-speak-btn, .word:focus-within .word-speak-btn{ display:inline; }
 .word:hover, .word:focus-visible{ background:rgba(193,127,43,0.14); }
 .word.saved{ border-bottom-style:solid; border-bottom-color:var(--sage); }
 .translit{
@@ -224,6 +236,11 @@ main{flex:1; padding:24px 20px 60px;}
   min-width:150px;
 }
 .popover .tr{ font-weight:700; margin-bottom:8px; }
+.popover .tr .speaker-btn{
+  width:auto; background:none; color:var(--paper); opacity:.85;
+  padding:0; margin-left:6px; border-radius:0; min-height:auto; font-weight:400;
+}
+.popover .tr .speaker-btn:hover{ opacity:1; }
 .popover button{
   width:100%; border:none; border-radius:7px; background:var(--amber); color:var(--paper);
   padding:7px 10px; font-size:12.5px; font-weight:700; cursor:pointer; min-height:32px;

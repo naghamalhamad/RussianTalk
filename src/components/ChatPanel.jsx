@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { DIALOGS } from '../data.js';
+import { stopSpeaking } from '../speech.js';
+import SpeakerButton from './SpeakerButton.jsx';
 
 function BubbleWords({ line, dialogId, topicId, savedWords, onWordClick }) {
   if (!line.words.length) return line.ru;
@@ -32,6 +34,7 @@ function BubbleWords({ line, dialogId, topicId, savedWords, onWordClick }) {
         onClick={(e) => onWordClick(e, seg.text, seg.tr, dialogId, topicId)}
       >
         {seg.text}
+        <SpeakerButton text={seg.text} label={`Play "${seg.text}"`} className="word-speak-btn" />
       </span>
     ) : (
       <span key={i}>{seg.text}</span>
@@ -49,6 +52,7 @@ export default function ChatPanel({ dialogId, flashcards, onSaveWord, onRemoveWo
   useEffect(() => {
     setShownLines(new Set());
     setPopover(null);
+    stopSpeaking();
   }, [dialogId]);
 
   useEffect(() => {
@@ -96,7 +100,10 @@ export default function ChatPanel({ dialogId, flashcards, onSaveWord, onRemoveWo
       {d.lines.map((line, li) => (
         <div className={`bubble-row ${line.side}`} key={li}>
           <div className="bubble-wrap">
-            <div className="speaker-tag">{line.speaker}</div>
+            <div className="speaker-tag">
+              {line.speaker}
+              <SpeakerButton text={line.ru} label="Play sentence" />
+            </div>
             <div
               className="bubble"
               onClick={() => toggleTranslation(li)}
@@ -123,6 +130,7 @@ export default function ChatPanel({ dialogId, flashcards, onSaveWord, onRemoveWo
         <div className="popover shown" style={{ top: popover.top, left: popover.left }}>
           <div className="tr">
             {popover.word} — {popover.tr}
+            <SpeakerButton text={popover.word} label={`Play "${popover.word}"`} />
           </div>
           <button
             className={alreadySaved ? 'saved-btn' : ''}

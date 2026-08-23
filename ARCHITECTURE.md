@@ -42,6 +42,12 @@ jobs.
   again from scratch somewhere else. (This file didn't exist until
   today; it replaced four separate copies of the same calculation.)
 
+- **`src/speech.js`** — The one shared "read this out loud" helper.
+  It uses the browser's own built-in narrator (no internet call, no
+  extra software) to read Russian text aloud. Anything that needs to
+  speak text calls the `speak()` function here — nothing else should
+  talk to the browser's narrator directly.
+
 - **`src/styles.css`** — The one shared paint-and-furniture catalog.
   All the colors, fonts, and spacing used anywhere in the app are
   defined once at the top (as named "tokens," like "amber" or
@@ -58,6 +64,9 @@ jobs.
   - `GlobalFlashcards.jsx` — the "All flashcards" screen
   - `TrainingModal.jsx` — the flip-card quiz popup
   - `EmptyState.jsx` — the small "nothing here yet" placeholder message
+  - `SpeakerButton.jsx` — the reusable 🔊 button that reads a piece of
+    text out loud when tapped. Any new "read this aloud" button
+    anywhere in the app should reuse this component, not build its own.
 
 - **`.github/workflows/deploy.yml`** — The auto-publish robot. Every
   time changes are pushed to `main`, this automatically rebuilds the
@@ -93,6 +102,10 @@ A simple checklist for "where does my change go?":
    local to that screen's own file, the same simple way every other
    screen does it. Only things that matter *everywhere* (like the
    saved-flashcards list) belong up in `App.jsx`.
+6. **Need to read some text out loud?** → Use the existing
+   `SpeakerButton` component and the `speak()` function in
+   `src/speech.js`. Don't write a new way of talking to the browser's
+   narrator.
 
 ## 3. Naming Conventions
 
@@ -114,7 +127,45 @@ So new code blends in with the existing style:
   This is how a child screen tells the parent "the user did a thing,
   you decide what happens."
 
-## 4. Things Not To Do
+## 4. How Audio Playback Works
+
+The app can read Russian text out loud (the 🔊 buttons on each sentence
+and each word). This uses the browser's own built-in narrator (called
+the "Web Speech API" if you look it up) — the same kind of voice your
+phone or computer already uses for things like reading messages aloud.
+That means: no internet call, no API key, no added library — it fits
+the app's "everything is local" rule perfectly.
+
+How it's wired up:
+
+- `src/speech.js` holds the one `speak(text)` function that actually
+  talks to the browser's narrator, and tells it to read the text as
+  Russian.
+- `src/components/SpeakerButton.jsx` is the one reusable 🔊 button.
+  Give it some text and a label, and it handles the rest.
+- It's used in three places in `ChatPanel.jsx`: next to each speaker's
+  name (reads the whole line), inline after each clickable word but
+  only revealed on hover (reads just that word), and inside the
+  word popup that already appears when you tap a word (this is the
+  version mobile users see, since there's no "hover" on a touchscreen
+  — tapping a word already opens that popup, so the speaker button
+  rides along with it instead of needing a separate gesture).
+
+**An honest limitation, not a bug**: whether the audio actually sounds
+right depends on whether the visitor's own phone or computer has a
+Russian voice installed — that's controlled by their device, not by
+this app, the same way a phone might or might not have a Russian
+keyboard installed. No website can install a voice onto someone else's
+device. If a visitor's device has no Russian voice, the button will
+still try to speak, but it may read the text with a foreign accent
+rather than sounding native. If you're building on this later, don't
+try to detect or "fix" this — there's nothing to fix from the app's
+side.
+
+If you add more places that need to read text aloud, always reuse
+`SpeakerButton` and `speak()` — don't write a second version of this.
+
+## 5. Things Not To Do
 
 - **Saved words are tracked globally by word text — one word equals
   one flashcard, no matter how many topics or conversations it appears
@@ -149,3 +200,6 @@ So new code blends in with the existing style:
 - **Don't leave debug leftovers in.** No `console.log` statements,
   commented-out code, or half-finished features should be committed —
   there currently are none; keep it that way.
+- **Don't build a second way of reading text out loud.** Reuse
+  `SpeakerButton` and `src/speech.js` — see "How Audio Playback Works"
+  above.
