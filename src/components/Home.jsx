@@ -1,4 +1,5 @@
 import { TOPICS } from '../data.js';
+import { cardsForTopic } from '../selectors.js';
 
 export default function Home({ flashcards, onOpenTopic }) {
   return (
@@ -10,7 +11,7 @@ export default function Home({ flashcards, onOpenTopic }) {
       <div className="topic-grid">
         {TOPICS.map((t) => {
           const has = t.dialogs.length > 0;
-          const savedCount = flashcards.filter((f) => f.topicId === t.id).length;
+          const savedCount = cardsForTopic(flashcards, t.id).length;
           return (
             <button key={t.id} className="topic-card" onClick={() => onOpenTopic(t.id)}>
               <div className="line" style={{ background: t.color }} />

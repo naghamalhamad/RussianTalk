@@ -1,4 +1,5 @@
 import { DIALOGS } from '../data.js';
+import { cardsForDialog } from '../selectors.js';
 
 export default function DialogMenu({ topic, currentDialogId, flashcards, onOpenDialog }) {
   return (
@@ -9,7 +10,7 @@ export default function DialogMenu({ topic, currentDialogId, flashcards, onOpenD
       ) : (
         topic.dialogs.map((did) => {
           const d = DIALOGS[did];
-          const count = flashcards.filter((f) => f.dialogId === did).length;
+          const count = cardsForDialog(flashcards, did).length;
           return (
             <button
               key={did}

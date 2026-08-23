@@ -61,7 +61,7 @@ export default function ChatPanel({ dialogId, flashcards, onSaveWord, onRemoveWo
     return () => document.removeEventListener('click', handleDocClick);
   }, []);
 
-  const savedWords = new Set(flashcards.map((f) => f.word));
+  const savedWords = new Set(flashcards.filter((f) => f.dialogId === dialogId).map((f) => f.word));
 
   function toggleTranslation(li) {
     setShownLines((prev) => {
@@ -127,7 +127,7 @@ export default function ChatPanel({ dialogId, flashcards, onSaveWord, onRemoveWo
           <button
             className={alreadySaved ? 'saved-btn' : ''}
             onClick={() => {
-              if (alreadySaved) onRemoveWord(popover.word);
+              if (alreadySaved) onRemoveWord(popover.dialogId, popover.word);
               else onSaveWord(popover);
               setPopover(null);
             }}

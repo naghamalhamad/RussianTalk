@@ -4,6 +4,7 @@ import DialogMenu from './DialogMenu.jsx';
 import ChatPanel from './ChatPanel.jsx';
 import TicketGrid from './TicketGrid.jsx';
 import EmptyState from './EmptyState.jsx';
+import { cardsForDialog, cardsForTopic } from '../selectors.js';
 
 export default function TopicView({ topicId, flashcards, onSaveWord, onRemoveWord, onBack, onStartTraining }) {
   const topic = TOPICS.find((t) => t.id === topicId);
@@ -17,11 +18,8 @@ export default function TopicView({ topicId, flashcards, onSaveWord, onRemoveWor
     setScope('dialog');
   }, [topicId]);
 
-  const topicCardCount = flashcards.filter((f) => f.topicId === topicId).length;
-  const scopedCards =
-    scope === 'dialog'
-      ? flashcards.filter((f) => f.dialogId === dialogId)
-      : flashcards.filter((f) => f.topicId === topicId);
+  const topicCardCount = cardsForTopic(flashcards, topicId).length;
+  const scopedCards = scope === 'dialog' ? cardsForDialog(flashcards, dialogId) : cardsForTopic(flashcards, topicId);
 
   return (
     <section>

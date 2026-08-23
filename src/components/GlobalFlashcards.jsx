@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { TOPICS } from '../data.js';
+import { cardsForTopic } from '../selectors.js';
 import TicketGrid from './TicketGrid.jsx';
 
 export default function GlobalFlashcards({ flashcards, onRemoveWord, onBack, onStartTraining }) {
   const [filter, setFilter] = useState({ type: 'all', id: null });
   const usedTopics = [...new Set(flashcards.map((f) => f.topicId))];
 
-  const cards =
-    filter.type === 'all' ? flashcards : flashcards.filter((f) => f.topicId === filter.id);
+  const cards = filter.type === 'all' ? flashcards : cardsForTopic(flashcards, filter.id);
 
   return (
     <section>
@@ -22,7 +22,7 @@ export default function GlobalFlashcards({ flashcards, onRemoveWord, onBack, onS
         </button>
         {usedTopics.map((tid) => {
           const t = TOPICS.find((x) => x.id === tid);
-          const n = flashcards.filter((f) => f.topicId === tid).length;
+          const n = cardsForTopic(flashcards, tid).length;
           return (
             <button
               key={tid}
