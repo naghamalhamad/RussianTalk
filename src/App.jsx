@@ -16,6 +16,10 @@ export default function App() {
     setFlashcards((prev) => (prev.some((f) => f.word === word) ? prev : [...prev, { word, tr, dialogId, topicId: wordTopicId }]));
   }
 
+  function removeWord(word) {
+    setFlashcards((prev) => prev.filter((f) => f.word !== word));
+  }
+
   function startTraining(cards) {
     if (cards.length) setTrainingCards(cards);
   }
@@ -43,6 +47,7 @@ export default function App() {
             topicId={topicId}
             flashcards={flashcards}
             onSaveWord={saveWord}
+            onRemoveWord={removeWord}
             onBack={() => setView('home')}
             onStartTraining={startTraining}
           />
@@ -50,6 +55,7 @@ export default function App() {
         {view === 'global' && (
           <GlobalFlashcards
             flashcards={flashcards}
+            onRemoveWord={removeWord}
             onBack={() => setView('home')}
             onStartTraining={startTraining}
           />

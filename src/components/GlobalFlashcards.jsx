@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { TOPICS } from '../data.js';
 import TicketGrid from './TicketGrid.jsx';
 
-export default function GlobalFlashcards({ flashcards, onBack, onStartTraining }) {
+export default function GlobalFlashcards({ flashcards, onRemoveWord, onBack, onStartTraining }) {
   const [filter, setFilter] = useState({ type: 'all', id: null });
   const usedTopics = [...new Set(flashcards.map((f) => f.topicId))];
 
@@ -41,6 +41,7 @@ export default function GlobalFlashcards({ flashcards, onBack, onStartTraining }
       <TicketGrid
         cards={cards}
         showTopicIcon
+        onDelete={onRemoveWord}
         emptyTitle="No flashcards yet"
         emptyBody="Words you save from any dialog will collect here."
       />

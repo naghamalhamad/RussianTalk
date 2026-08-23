@@ -39,7 +39,7 @@ function BubbleWords({ line, dialogId, topicId, savedWords, onWordClick }) {
   );
 }
 
-export default function ChatPanel({ dialogId, flashcards, onSaveWord }) {
+export default function ChatPanel({ dialogId, flashcards, onSaveWord, onRemoveWord }) {
   const d = DIALOGS[dialogId];
   const [shownLines, setShownLines] = useState(() => new Set());
   const [popover, setPopover] = useState(null);
@@ -121,11 +121,12 @@ export default function ChatPanel({ dialogId, flashcards, onSaveWord }) {
           <button
             className={alreadySaved ? 'saved-btn' : ''}
             onClick={() => {
-              onSaveWord(popover);
+              if (alreadySaved) onRemoveWord(popover.word);
+              else onSaveWord(popover);
               setPopover(null);
             }}
           >
-            {alreadySaved ? '✓ Saved' : '+ Save as flashcard'}
+            {alreadySaved ? '✕ Remove flashcard' : '+ Save as flashcard'}
           </button>
         </div>
       )}

@@ -5,7 +5,7 @@ import ChatPanel from './ChatPanel.jsx';
 import TicketGrid from './TicketGrid.jsx';
 import EmptyState from './EmptyState.jsx';
 
-export default function TopicView({ topicId, flashcards, onSaveWord, onBack, onStartTraining }) {
+export default function TopicView({ topicId, flashcards, onSaveWord, onRemoveWord, onBack, onStartTraining }) {
   const topic = TOPICS.find((t) => t.id === topicId);
   const [tab, setTab] = useState('dialogs');
   const [dialogId, setDialogId] = useState(topic.dialogs[0] ?? null);
@@ -45,7 +45,7 @@ export default function TopicView({ topicId, flashcards, onSaveWord, onBack, onS
         <div className="topic-layout">
           <DialogMenu topic={topic} currentDialogId={dialogId} flashcards={flashcards} onOpenDialog={setDialogId} />
           {dialogId ? (
-            <ChatPanel dialogId={dialogId} flashcards={flashcards} onSaveWord={onSaveWord} />
+            <ChatPanel dialogId={dialogId} flashcards={flashcards} onSaveWord={onSaveWord} onRemoveWord={onRemoveWord} />
           ) : (
             <div className="chat-panel">
               <EmptyState
@@ -70,6 +70,7 @@ export default function TopicView({ topicId, flashcards, onSaveWord, onBack, onS
           </div>
           <TicketGrid
             cards={scopedCards}
+            onDelete={onRemoveWord}
             emptyTitle="No flashcards yet"
             emptyBody="Save a word from a dialog and it will show up here as a ticket."
           />
