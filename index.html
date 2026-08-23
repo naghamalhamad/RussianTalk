@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RusTalk — UI Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EFEDE6;
+    --paper:#FBFAF6;
+    --paper-2:#F4F1E9;
+    --ink:#232722;
+    --ink-soft:#5B6058;
+    --line:#DAD5C8;
+    --amber:#C17F2B;
+    --amber-tint:#F3E4CD;
+    --frost:#3D6C86;
+    --frost-tint:#DCE8ED;
+    --sage:#5C7A52;
+    --sage-tint:#E1E9DB;
+    --shadow: 0 2px 10px rgba(35,39,34,0.08);
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'PT Sans', sans-serif;
+    font-size:16px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{font-family:'PT Serif', serif;}
+  button{font-family:inherit;}
+  :focus-visible{outline:2px solid var(--frost); outline-offset:2px;}
+
+  .app{
+    max-width:1100px;
+    margin:0 auto;
+    min-height:100vh;
+    background:var(--bg);
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* ===== Top bar ===== */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 20px;
+    border-bottom:1px solid var(--line);
+    position:sticky; top:0; z-index:20;
+    background:var(--bg);
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px;
+    cursor:pointer; background:none; border:none; padding:0;
+  }
+  .brand .mark{
+    width:34px;height:34px;border-radius:9px;
+    background:var(--amber);
+    color:var(--paper);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'PT Serif',serif; font-weight:700; font-size:18px;
+  }
+  .brand .name{font-family:'PT Serif',serif; font-weight:700; font-size:20px; color:var(--ink);}
+  .brand .tag{font-size:12px; color:var(--ink-soft); display:block; margin-top:-2px;}
+  .nav-actions{display:flex; gap:8px;}
+  .nav-btn{
+    display:flex; align-items:center; gap:6px;
+    border:1px solid var(--line); background:var(--paper);
+    border-radius:999px; padding:9px 16px; font-size:14px; font-weight:700;
+    color:var(--ink); cursor:pointer; min-height:44px;
+  }
+  .nav-btn.active{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+  .nav-btn .count{
+    background:var(--amber); color:var(--paper); border-radius:999px;
+    font-size:11px; padding:1px 7px; font-weight:700;
+  }
+  .nav-btn.active .count{ background:var(--amber); }
+
+  main{flex:1; padding:24px 20px 60px;}
+
+  /* ===== Home / Topic grid ===== */
+  .home-head{margin-bottom:20px;}
+  .home-head h1{font-size:26px; margin:0 0 4px;}
+  .home-head p{margin:0; color:var(--ink-soft); font-size:15px;}
+
+  .topic-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(220px,1fr));
+    gap:14px;
+  }
+  .topic-card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px;
+    text-align:left;
+    cursor:pointer;
+    min-height:120px;
+    display:flex; flex-direction:column; justify-content:space-between;
+    box-shadow:var(--shadow);
+    transition:transform .12s ease;
+    position:relative;
+    overflow:hidden;
+  }
+  .topic-card:hover{ transform:translateY(-2px); }
+  .topic-card .line{
+    position:absolute; left:0; top:0; bottom:0; width:5px;
+  }
+  .topic-card .icon{font-size:22px;}
+  .topic-card h3{ margin:10px 0 2px; font-size:16px; }
+  .topic-card .ru{ font-size:12px; color:var(--ink-soft); }
+  .topic-card .meta{
+    margin-top:10px; font-size:12px; color:var(--ink-soft);
+    display:flex; align-items:center; gap:6px;
+  }
+  .topic-card .meta.ready{ color:var(--sage); font-weight:700; }
+
+  /* ===== Topic detail layout ===== */
+  .topic-view{ display:none; }
+  .topic-view.visible{ display:block; }
+  .back-row{
+    display:flex; align-items:center; gap:10px; margin-bottom:16px;
+  }
+  .back-btn{
+    border:1px solid var(--line); background:var(--paper); border-radius:10px;
+    padding:8px 14px; font-size:14px; font-weight:700; cursor:pointer; min-height:40px;
+  }
+  .topic-title{font-size:22px; margin:0;}
+  .topic-title .ru{ color:var(--ink-soft); font-size:14px; font-weight:400; margin-left:8px;}
+
+  .topic-tabs{ display:flex; gap:8px; margin:16px 0; }
+  .topic-tab{
+    border:1px solid var(--line); background:var(--paper); border-radius:999px;
+    padding:8px 16px; font-size:14px; font-weight:700; cursor:pointer; min-height:40px;
+  }
+  .topic-tab.active{ background:var(--frost); color:var(--paper); border-color:var(--frost); }
+
+  .topic-layout{
+    display:grid;
+    grid-template-columns: 230px 1fr;
+    gap:20px;
+    align-items:start;
+  }
+  @media (max-width: 700px){
+    .topic-layout{ grid-template-columns: 1fr; }
+  }
+
+  .dialog-menu{
+    background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .dialog-menu .heading{
+    padding:12px 14px; font-size:12px; text-transform:uppercase; letter-spacing:.04em;
+    color:var(--ink-soft); border-bottom:1px solid var(--line); font-weight:700;
+  }
+  .dialog-item{
+    display:flex; justify-content:space-between; align-items:center; gap:8px;
+    width:100%; text-align:left; padding:12px 14px; border:none; background:none;
+    border-bottom:1px solid var(--line); cursor:pointer; font-size:14px; color:var(--ink);
+    min-height:44px;
+  }
+  .dialog-item:last-child{ border-bottom:none; }
+  .dialog-item.active{ background:var(--amber-tint); font-weight:700; }
+  .dialog-item .badge{
+    font-size:11px; background:var(--sage-tint); color:var(--sage); border-radius:999px;
+    padding:1px 7px; font-weight:700;
+  }
+
+  /* ===== Chat panel ===== */
+  .chat-panel{
+    background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
+    padding:18px; min-height:400px;
+  }
+  .chat-panel .dialog-heading{ font-size:17px; margin:0 0 4px; }
+  .chat-panel .dialog-sub{ font-size:13px; color:var(--ink-soft); margin:0 0 16px; }
+
+  .empty-state{
+    text-align:center; padding:60px 20px; color:var(--ink-soft);
+  }
+  .empty-state .icon{font-size:30px; margin-bottom:10px;}
+  .empty-state h3{ color:var(--ink); margin:0 0 6px; }
+  .empty-state p{ margin:0; font-size:14px; }
+
+  .bubble-row{
+    display:flex; margin-bottom:14px; gap:10px; align-items:flex-end;
+  }
+  .bubble-row.right{ justify-content:flex-end; }
+  .speaker-tag{
+    font-size:11px; color:var(--ink-soft); margin-bottom:4px; font-weight:700;
+  }
+  .bubble-wrap{ max-width:78%; }
+  .bubble-row.right .bubble-wrap{ text-align:right; }
+  .bubble{
+    display:inline-block; text-align:left;
+    padding:11px 14px; border-radius:16px; cursor:pointer;
+    font-size:16px; line-height:1.55;
+    border:1px solid transparent;
+  }
+  .bubble-row.left .bubble{
+    background:var(--frost-tint); border-color:#c9dbe2;
+    border-bottom-left-radius:4px;
+  }
+  .bubble-row.right .bubble{
+    background:var(--amber-tint); border-color:#e6cda2;
+    border-bottom-right-radius:4px;
+  }
+  .word{
+    border-bottom:1.5px dotted var(--amber);
+    cursor:pointer; padding:0 1px; position:relative; border-radius:3px;
+  }
+  .word:hover, .word:focus-visible{ background:rgba(193,127,43,0.14); }
+  .word.saved{ border-bottom-style:solid; border-bottom-color:var(--sage); }
+  .translit{
+    font-size:12px; color:var(--ink-soft); margin-top:3px; padding:0 4px; font-style:italic;
+    opacity:.85;
+  }
+  .translation-line{
+    margin-top:6px; font-size:13.5px; color:var(--ink-soft); font-style:italic;
+    display:none; padding:0 4px;
+  }
+  .translation-line.shown{ display:block; }
+  .hint-row{ text-align:center; font-size:12px; color:var(--ink-soft); margin:14px 0 4px; }
+
+  /* word popover */
+  .popover{
+    position:absolute; z-index:50; background:var(--ink); color:var(--paper);
+    border-radius:10px; padding:10px 12px; font-size:13px; box-shadow:0 8px 20px rgba(0,0,0,.25);
+    min-width:150px; display:none;
+  }
+  .popover.shown{ display:block; }
+  .popover .tr{ font-weight:700; margin-bottom:8px; }
+  .popover button{
+    width:100%; border:none; border-radius:7px; background:var(--amber); color:var(--paper);
+    padding:7px 10px; font-size:12.5px; font-weight:700; cursor:pointer; min-height:32px;
+  }
+  .popover button.saved-btn{ background:var(--sage); }
+
+  /* ===== Flashcards ===== */
+  .fc-toolbar{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:16px; }
+  .chip{
+    border:1px solid var(--line); background:var(--paper); border-radius:999px;
+    padding:7px 14px; font-size:13px; cursor:pointer; font-weight:700; color:var(--ink-soft);
+    min-height:36px;
+  }
+  .chip.active{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
+  .train-btn{
+    margin-left:auto; border:none; background:var(--sage); color:var(--paper);
+    border-radius:999px; padding:10px 18px; font-weight:700; font-size:14px; cursor:pointer;
+    min-height:44px;
+  }
+
+  .ticket-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr)); gap:14px;
+  }
+  .ticket{
+    background:var(--paper); border:1px dashed #c7c0ae; border-radius:12px;
+    padding:14px 12px; position:relative; box-shadow:var(--shadow);
+  }
+  .ticket::before{
+    content:""; position:absolute; left:0; right:0; top:38px;
+    border-top:1px dashed #c7c0ae;
+  }
+  .ticket .stub{
+    font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft);
+    display:flex; justify-content:space-between; padding-bottom:8px; font-weight:700;
+  }
+  .ticket .word{ display:block; border:none; padding:14px 0 4px; font-family:'PT Serif',serif; font-size:18px; cursor:default; }
+  .ticket .tr{ font-size:12.5px; color:var(--ink-soft); }
+
+  /* ===== Training modal ===== */
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(35,39,34,0.55); z-index:100;
+    display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-backdrop.shown{ display:flex; }
+  .train-modal{
+    background:var(--bg); border-radius:18px; padding:22px; width:100%; max-width:380px;
+    text-align:center;
+  }
+  .train-modal .progress{ font-size:12px; color:var(--ink-soft); margin-bottom:14px; font-weight:700; }
+  .flip-card{
+    background:var(--paper); border:1px solid var(--line); border-radius:16px;
+    min-height:220px; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; padding:20px; cursor:pointer; box-shadow:var(--shadow);
+    position:relative;
+  }
+  .flip-card .side-label{
+    position:absolute; top:12px; left:14px; font-size:10px; text-transform:uppercase;
+    letter-spacing:.05em; color:var(--ink-soft); font-weight:700;
+  }
+  .flip-card .main-word{ font-family:'PT Serif',serif; font-size:26px; margin-top:10px; }
+  .flip-card .sub-word{ font-size:14px; color:var(--ink-soft); margin-top:10px; display:none; }
+  .flip-card.flipped .sub-word{ display:block; }
+  .flip-hint{ font-size:12px; color:var(--ink-soft); margin-top:10px; }
+  .train-controls{ display:flex; gap:10px; margin-top:16px; }
+  .train-controls button{
+    flex:1; border-radius:999px; border:none; padding:12px; font-weight:700; font-size:14px;
+    cursor:pointer; min-height:44px;
+  }
+  .btn-again{ background:var(--frost-tint); color:var(--frost); }
+  .btn-know{ background:var(--sage); color:var(--paper); }
+  .train-controls[hidden]{ display:none; }
+  .close-modal{
+    margin-top:14px; background:none; border:none; color:var(--ink-soft); font-size:13px;
+    cursor:pointer; text-decoration:underline; min-height:32px;
+  }
+  .summary h3{ margin:6px 0 4px; }
+  .summary p{ color:var(--ink-soft); font-size:14px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <button class="brand" onclick="goHome()">
+      <span class="mark">Р</span>
+      <span>
+        <span class="name">RusTalk</span>
+        <span class="tag">dialogs for the trip</span>
+      </span>
+    </button>
+    <div class="nav-actions">
+      <button class="nav-btn" id="navHome" onclick="goHome()">Topics</button>
+      <button class="nav-btn" id="navCards" onclick="goGlobalFlashcards()">
+        Flashcards <span class="count" id="globalCount">0</span>
+      </button>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- ===================== HOME VIEW ===================== -->
+    <section id="homeView">
+      <div class="home-head">
+        <h1>Choose a situation</h1>
+        <p>Each topic is a set of real dialogs. Read them in Russian, tap anything to translate, and save words as you go.</p>
+      </div>
+      <div class="topic-grid" id="topicGrid"></div>
+    </section>
+
+    <!-- ===================== TOPIC VIEW ===================== -->
+    <section id="topicView" class="topic-view">
+      <div class="back-row">
+        <button class="back-btn" onclick="goHome()">← Topics</button>
+      </div>
+      <h2 class="topic-title" id="topicTitle"></h2>
+
+      <div class="topic-tabs">
+        <button class="topic-tab active" id="tabDialogs" onclick="setTopicTab('dialogs')">Dialogs</button>
+        <button class="topic-tab" id="tabCards" onclick="setTopicTab('cards')">Flashcards <span id="topicCardCount"></span></button>
+      </div>
+
+      <!-- dialogs sub-view -->
+      <div id="dialogsSubview" class="topic-layout">
+        <nav class="dialog-menu" id="dialogMenu">
+          <div class="heading">Dialogs</div>
+        </nav>
+        <div class="chat-panel" id="chatPanel"></div>
+      </div>
+
+      <!-- topic-scoped flashcards sub-view -->
+      <div id="topicCardsSubview" style="display:none;">
+        <div class="fc-toolbar">
+          <button class="chip active" id="topicScopeDialog" onclick="setTopicCardScope('dialog')">This dialog</button>
+          <button class="chip" id="topicScopeTopic" onclick="setTopicCardScope('topic')">Whole topic</button>
+          <button class="train-btn" onclick="startTraining(currentTopicCardScope())">Train ▸</button>
+        </div>
+        <div class="ticket-grid" id="topicTicketGrid"></div>
+      </div>
+    </section>
+
+    <!-- ===================== GLOBAL FLASHCARDS VIEW ===================== -->
+    <section id="globalView" class="topic-view">
+      <div class="back-row">
+        <button class="back-btn" onclick="goHome()">← Topics</button>
+      </div>
+      <h2 class="topic-title">All flashcards</h2>
+      <div class="fc-toolbar" id="globalChips"></div>
+      <div class="ticket-grid" id="globalTicketGrid"></div>
+    </section>
+
+  </main>
+</div>
+
+<!-- word popover (single reused element) -->
+<div class="popover" id="popover">
+  <div class="tr" id="popTr"></div>
+  <button id="popBtn"></button>
+</div>
+
+<!-- training modal -->
+<div class="modal-backdrop" id="trainBackdrop">
+  <div class="train-modal">
+    <div id="trainBody"></div>
+  </div>
+</div>
+
+<script>
+/* ================= DATA ================= */
+const TOPICS = [
+  { id:'greetings', title:'Greetings & Politeness', ru:'Приветствия', icon:'👋', color:'#3D6C86', dialogs:[] },
+  { id:'cafes', title:'Cafés & Restaurants', ru:'Кафе и рестораны', icon:'☕', color:'#C17F2B', dialogs:['coffee-formal','coffee-casual','breakfast-formal','breakfast-casual','asking-bill'] },
+  { id:'metro', title:'Metro & Transportation', ru:'Метро и транспорт', icon:'🚇', color:'#5C7A52', dialogs:['buying-ticket'] },
+  { id:'hotels', title:'Hotels & Accommodation', ru:'Гостиницы', icon:'🛎️', color:'#8B5E83', dialogs:[] },
+  { id:'shopping', title:'Shopping & Money', ru:'Покупки и деньги', icon:'💶', color:'#B0562F', dialogs:[] },
+  { id:'numbers', title:'Numbers', ru:'Числа', icon:'#️⃣', color:'#3D6C86', dialogs:[] },
+  { id:'airport', title:'Airport', ru:'Аэропорт', icon:'✈️', color:'#5C7A52', dialogs:[] },
+  { id:'sightseeing', title:'Sightseeing & Museums', ru:'Достопримечательности', icon:'🏛️', color:'#C17F2B', dialogs:[] },
+  { id:'emergencies', title:'Emergencies & Asking for Help', ru:'Экстренная помощь', icon:'🆘', color:'#A6403D', dialogs:[] },
+  { id:'smalltalk', title:'Small Talk & Everyday Conversations', ru:'Разговоры', icon:'💬', color:'#8B5E83', dialogs:[] },
+  { id:'weather', title:'Weather', ru:'Погода', icon:'⛅', color:'#3D6C86', dialogs:[] },
+];
+
+const DIALOGS = {
+  'coffee-formal': {
+    topicId:'cafes', title:'Ordering Coffee — Formal', sub:'Waiter · You (sit-down café)',
+    lines:[
+      { speaker:'Waiter', side:'left', ru:'Доброе утро! Что будете заказывать?', translit:'Dobroe utro! Chto budete zakazyvat?', tr:'Good morning! What will you be ordering?',
+        words:[['Доброе','good'],['утро','morning'],['Что','what'],['будете','will (you)'],['заказывать','to order']] },
+      { speaker:'You', side:'right', ru:'Здравствуйте, можно мне капучино, пожалуйста.', translit:'Zdravstvuyte, mozhno mne kapuchino, pozhaluysta.', tr:'Hello, could I have a cappuccino, please.',
+        words:[['Здравствуйте','hello (formal)'],['можно','may/could'],['мне','me'],['капучино','cappuccino'],['пожалуйста','please']] },
+      { speaker:'Waiter', side:'left', ru:'Конечно. Какой объём — маленький, средний или большой?', translit:'Konechno. Kakoy obyom — malenkiy, sredniy ili bolshoy?', tr:'Of course. What size — small, medium, or large?',
+        words:[['Конечно','of course'],['Какой','what/which'],['объём','size'],['маленький','small'],['средний','medium'],['большой','large']] },
+      { speaker:'You', side:'right', ru:'Средний, пожалуйста.', translit:'Sredniy, pozhaluysta.', tr:'Medium, please.',
+        words:[['Средний','medium']] },
+      { speaker:'Waiter', side:'left', ru:'На каком молоке — обычное, овсяное, миндальное?', translit:'Na kakom moloke — obychnoe, ovsyanoe, mindalnoe?', tr:'What kind of milk — regular, oat, almond?',
+        words:[['молоке','milk'],['обычное','regular'],['овсяное','oat'],['миндальное','almond']] },
+      { speaker:'You', side:'right', ru:'На овсяном, если можно.', translit:'Na ovsyanom, esli mozhno.', tr:'Oat, if possible.',
+        words:[['овсяном','oat'],['если','if']] },
+      { speaker:'Waiter', side:'left', ru:'Хорошо. Что-нибудь ещё?', translit:'Khorosho. Chto-nibud eshchyo?', tr:'Alright. Anything else?',
+        words:[['Хорошо','alright'],['Что-нибудь','anything'],['ещё','else']] },
+      { speaker:'You', side:'right', ru:'Нет, спасибо, это всё.', translit:'Net, spasibo, eto vsyo.', tr:'No thanks, that’s all.',
+        words:[['Нет','no'],['спасибо','thanks'],['это','this'],['всё','all']] },
+      { speaker:'Waiter', side:'left', ru:'Присаживайтесь, я принесу.', translit:'Prisazhivaytes, ya prinesu.', tr:'Have a seat, I’ll bring it over.',
+        words:[['Присаживайтесь','have a seat'],['принесу','I’ll bring']] },
+    ]
+  },
+  'coffee-casual': {
+    topicId:'cafes', title:'Ordering Coffee — Casual', sub:'Barista · You (slang)',
+    lines:[
+      { speaker:'Barista', side:'left', ru:'Привет! Что будешь?', translit:'Privet! Chto budesh?', tr:'Hey! What’ll you have?',
+        words:[['Привет','hey'],['будешь','will you (have)']] },
+      { speaker:'You', side:'right', ru:'Капучино на овсяном, среднюю.', translit:'Kapuchino na ovsyanom, srednyuyu.', tr:'Oat cappuccino, medium.',
+        words:[['среднюю','medium']] },
+      { speaker:'Barista', side:'left', ru:'С собой или здесь?', translit:'S soboy ili zdes?', tr:'To go or for here?',
+        words:[['С собой','to go'],['здесь','here']] },
+      { speaker:'You', side:'right', ru:'С собой.', translit:'S soboy.', tr:'To go.', words:[] },
+      { speaker:'Barista', side:'left', ru:'Сколько сахара — как обычно, или без?', translit:'Skolko sakhara — kak obychno, ili bez?', tr:'How much sugar — usual, or none?',
+        words:[['Сколько','how much'],['сахара','sugar'],['обычно','usual'],['без','without']] },
+      { speaker:'You', side:'right', ru:'Без сахара, спасибо.', translit:'Bez sakhara, spasibo.', tr:'No sugar, thanks.', words:[['Без сахара','no sugar']] },
+      { speaker:'Barista', side:'left', ru:'Ок, минутка.', translit:'Ok, minutka.', tr:'Okay, one sec.',
+        words:[['минутка','one moment']] },
+    ]
+  },
+  'breakfast-formal': {
+    topicId:'cafes', title:'Ordering Breakfast — Formal', sub:'Waiter · You (sit-down café)',
+    lines:[
+      { speaker:'Waiter', side:'left', ru:'Вот меню. Что-то подсказать?', translit:'Vot menyu. Chto-to podskazat?', tr:'Here’s the menu. Can I suggest anything?',
+        words:[['Вот','here'],['меню','menu'],['подсказать','to suggest']] },
+      { speaker:'You', side:'right', ru:'Да, что у вас есть на завтрак?', translit:'Da, chto u vas est na zavtrak?', tr:'Yes, what do you have for breakfast?',
+        words:[['Да','yes'],['завтрак','breakfast']] },
+      { speaker:'Waiter', side:'left', ru:'У нас есть сырники, омлет, овсяная каша, тосты с авокадо и блины.', translit:'U nas est syrniki, omlet, ovsyanaya kasha, tosty s avokado i bliny.', tr:'We have syrniki, omelet, oatmeal, avocado toast, and bliny/pancakes.',
+        words:[['сырники','cheese pancakes (syrniki)'],['омлет','omelet'],['каша','porridge'],['тосты','toast'],['авокадо','avocado'],['блины','pancakes (bliny)']] },
+      { speaker:'You', side:'right', ru:'Я возьму сырники и омлет с сыром, пожалуйста.', translit:'Ya vozmu syrniki i omlet s syrom, pozhaluysta.', tr:'I’ll have syrniki and a cheese omelet, please.',
+        words:[['возьму','I’ll take'],['сыром','cheese']] },
+      { speaker:'Waiter', side:'left', ru:'Омлет из скольких яиц — двух или трёх?', translit:'Omlet iz skolkikh yaits — dvukh ili tryokh?', tr:'Omelet with how many eggs — two or three?',
+        words:[['яиц','eggs'],['двух','two'],['трёх','three']] },
+      { speaker:'You', side:'right', ru:'Из двух, спасибо.', translit:'Iz dvukh, spasibo.', tr:'Two, thanks.', words:[] },
+      { speaker:'Waiter', side:'left', ru:'Что-нибудь из напитков?', translit:'Chto-nibud iz napitkov?', tr:'Anything to drink?',
+        words:[['напитков','drinks']] },
+      { speaker:'You', side:'right', ru:'Апельсиновый сок и, пожалуйста, ещё один капучино.', translit:'Apelsinovyy sok i, pozhaluysta, eshchyo odin kapuchino.', tr:'Orange juice, and one more cappuccino please.',
+        words:[['Апельсиновый','orange'],['сок','juice'],['ещё один','one more']] },
+      { speaker:'Waiter', side:'left', ru:'Отлично, сейчас всё будет.', translit:'Otlichno, seychas vsyo budet.', tr:'Great, coming right up.',
+        words:[['Отлично','great'],['сейчас','right now']] },
+    ]
+  },
+  'breakfast-casual': {
+    topicId:'cafes', title:'Ordering Breakfast — Casual', sub:'Barista/Friend · You (slang)',
+    lines:[
+      { speaker:'Barista', side:'left', ru:'Есть будешь что-нибудь? Или только кофе?', translit:'Est budesh chto-nibud? Ili tolko kofe?', tr:'You gonna eat something? Or just coffee?',
+        words:[['Есть','to eat'],['только','only']] },
+      { speaker:'You', side:'right', ru:'Ну давай, что посоветуешь?', translit:'Nu davay, chto posovetuesh?', tr:'Sure, what do you recommend?',
+        words:[['давай','sure/go ahead'],['посоветуешь','recommend']] },
+      { speaker:'Barista', side:'left', ru:'Сырники топовые, все берут.', translit:'Syrniki topovye, vse berut.', tr:'The syrniki are top-notch, everyone gets them.',
+        words:[['топовые','top-notch'],['все','everyone'],['берут','get/take']] },
+      { speaker:'You', side:'right', ru:'Погнали, давай сырники и капучино.', translit:'Pognali, davay syrniki i kapuchino.', tr:'Let’s do it, syrniki and a cappuccino.',
+        words:[['Погнали','let’s go']] },
+      { speaker:'Barista', side:'left', ru:'Со сметаной или с джемом?', translit:'So smetanoy ili s dzhemom?', tr:'With sour cream or jam?',
+        words:[['сметаной','sour cream'],['джемом','jam']] },
+      { speaker:'You', side:'right', ru:'Со сметаной, конечно.', translit:'So smetanoy, konechno.', tr:'Sour cream, of course.',
+        words:[['сметаной','sour cream'],['конечно','of course']] },
+    ]
+  },
+  'asking-bill': {
+    topicId:'cafes', title:'Paying the Bill', sub:'Waiter · You (formal)',
+    lines:[
+      { speaker:'You', side:'right', ru:'Можно счёт, пожалуйста?', translit:'Mozhno schyot, pozhaluysta?', tr:'Could I have the bill, please?',
+        words:[['счёт','bill']] },
+      { speaker:'Waiter', side:'left', ru:'Конечно, один момент.', translit:'Konechno, odin moment.', tr:'Of course, one moment.',
+        words:[['Конечно','of course'],['момент','moment']] },
+      { speaker:'You', side:'right', ru:'Можно оплатить картой?', translit:'Mozhno oplatit kartoy?', tr:'Can I pay by card?',
+        words:[['оплатить','to pay'],['картой','by card']] },
+      { speaker:'Waiter', side:'left', ru:'Да, конечно.', translit:'Da, konechno.', tr:'Yes, of course.', words:[] },
+      { speaker:'You', side:'right', ru:'Сдачи не надо.', translit:'Sdachi ne nado.', tr:'Keep the change.',
+        words:[['Сдачи','change'],['надо','need/necessary']] },
+    ]
+  },
+  'buying-ticket': {
+    topicId:'metro', title:'Buying a Metro Ticket', sub:'Cashier · Traveler',
+    lines:[
+      { speaker:'Traveler', side:'right', ru:'Здравствуйте, один билет до центра, пожалуйста.', tr:'Hello, one ticket to the center, please.',
+        words:[['один','one'],['билет','ticket'],['до','to'],['центра','the center'],['пожалуйста','please']] },
+      { speaker:'Cashier', side:'left', ru:'На одну поездку или проездной?', tr:'For one ride, or a travel pass?',
+        words:[['одну','one'],['поездку','ride'],['или','or'],['проездной','travel pass']] },
+      { speaker:'Traveler', side:'right', ru:'На одну поездку.', tr:'For one ride.', words:[] },
+      { speaker:'Cashier', side:'left', ru:'С вас пятьдесят рублей.', tr:'That will be fifty rubles.',
+        words:[['С вас','from you (i.e. you owe)'],['пятьдесят','fifty'],['рублей','rubles']] },
+    ]
+  }
+};
+
+/* saved flashcards — pre-seeded with a few so the training/flashcard views have content */
+let flashcards = [
+  { word:'капучино', tr:'cappuccino', dialogId:'coffee-formal', topicId:'cafes' },
+  { word:'пожалуйста', tr:'please', dialogId:'coffee-formal', topicId:'cafes' },
+  { word:'билет', tr:'ticket', dialogId:'buying-ticket', topicId:'metro' },
+  { word:'счёт', tr:'bill', dialogId:'asking-bill', topicId:'cafes' },
+  { word:'сырники', tr:'cheese pancakes (syrniki)', dialogId:'breakfast-formal', topicId:'cafes' },
+  { word:'омлет', tr:'omelet', dialogId:'breakfast-formal', topicId:'cafes' },
+  { word:'каша', tr:'porridge', dialogId:'breakfast-formal', topicId:'cafes' },
+  { word:'сметаной', tr:'sour cream', dialogId:'breakfast-casual', topicId:'cafes' },
+];
+
+/* ================= STATE ================= */
+let currentTopicId = null;
+let currentDialogId = null;
+let topicTab = 'dialogs';
+let topicCardScope = 'dialog';
+let globalScopeFilter = { type:'all', id:null };
+let trainSession = null;
+
+/* ================= RENDER: HOME ================= */
+function renderTopicGrid(){
+  const grid = document.getElementById('topicGrid');
+  grid.innerHTML = TOPICS.map(t=>{
+    const has = t.dialogs.length>0;
+    const savedCount = flashcards.filter(f=>f.topicId===t.id).length;
+    return `<button class="topic-card" onclick="openTopic('${t.id}')">
+      <div class="line" style="background:${t.color}"></div>
+      <div>
+        <div class="icon">${t.icon}</div>
+        <h3>${t.title}</h3>
+        <div class="ru">${t.ru}</div>
+      </div>
+      <div class="meta ${has?'ready':''}">
+        ${has ? `${t.dialogs.length} dialog${t.dialogs.length>1?'s':''} · ${savedCount} saved` : 'No dialogs yet'}
+      </div>
+    </button>`;
+  }).join('');
+}
+
+function goHome(){
+  document.getElementById('homeView').style.display='block';
+  document.getElementById('topicView').classList.remove('visible');
+  document.getElementById('globalView').classList.remove('visible');
+  setNav('navHome');
+  renderTopicGrid();
+  updateGlobalCount();
+}
+
+/* ================= TOPIC VIEW ================= */
+function openTopic(topicId){
+  currentTopicId = topicId;
+  topicTab = 'dialogs';
+  const topic = TOPICS.find(t=>t.id===topicId);
+  document.getElementById('homeView').style.display='none';
+  document.getElementById('globalView').classList.remove('visible');
+  document.getElementById('topicView').classList.add('visible');
+  setNav(null);
+  document.getElementById('topicTitle').innerHTML = `${topic.icon} ${topic.title} <span class="ru">${topic.ru}</span>`;
+
+  renderDialogMenu(topic);
+  if(topic.dialogs.length){
+    openDialog(topic.dialogs[0]);
+  } else {
+    currentDialogId = null;
+    document.getElementById('chatPanel').innerHTML = emptyStateHTML(
+      'No dialogs yet', `Add your first dialog for "${topic.title}" and it will appear here as a chat.`
+    );
+  }
+  setTopicTab('dialogs');
+}
+
+function emptyStateHTML(title, body){
+  return `<div class="empty-state"><div class="icon">✎</div><h3>${title}</h3><p>${body}</p></div>`;
+}
+
+function renderDialogMenu(topic){
+  const menu = document.getElementById('dialogMenu');
+  let html = `<div class="heading">Dialogs</div>`;
+  if(!topic.dialogs.length){
+    html += `<div style="padding:14px;font-size:13px;color:var(--ink-soft)">Nothing here yet.</div>`;
+  } else {
+    topic.dialogs.forEach(did=>{
+      const d = DIALOGS[did];
+      const count = flashcards.filter(f=>f.dialogId===did).length;
+      html += `<button class="dialog-item ${did===currentDialogId?'active':''}" onclick="openDialog('${did}')">
+        <span>${d.title}</span>
+        ${count? `<span class="badge">${count}</span>`:''}
+      </button>`;
+    });
+  }
+  menu.innerHTML = html;
+}
+
+function openDialog(dialogId){
+  currentDialogId = dialogId;
+  const topic = TOPICS.find(t=>t.id===currentTopicId);
+  renderDialogMenu(topic);
+  renderChatPanel(dialogId);
+}
+
+function renderChatPanel(dialogId){
+  const d = DIALOGS[dialogId];
+  const panel = document.getElementById('chatPanel');
+  let html = `<h3 class="dialog-heading">${d.title}</h3><p class="dialog-sub">${d.sub}</p>`;
+  d.lines.forEach((line, li)=>{
+    html += `<div class="bubble-row ${line.side}">
+      <div class="bubble-wrap">
+        <div class="speaker-tag">${line.speaker}</div>
+        <div class="bubble" onclick="toggleTranslation(this)" data-dialog="${dialogId}" data-line="${li}">
+          ${renderWords(line, dialogId, li)}
+        </div>
+        ${line.translit ? `<div class="translit">${line.translit}</div>` : ''}
+        <div class="translation-line" data-tr>${line.tr}</div>
+      </div>
+    </div>`;
+  });
+  html += `<div class="hint-row">Tap a bubble to translate the sentence · tap a word to translate & save it</div>`;
+  panel.innerHTML = html;
+}
+
+function renderWords(line, dialogId, li){
+  if(!line.words.length) return line.ru;
+  // Build spans only for the annotated words, keep the rest of sentence intact via simple split.
+  let text = line.ru;
+  line.words.forEach(([w,tr], wi)=>{
+    const saved = flashcards.some(f=>f.word===w);
+    const span = `<span class="word ${saved?'saved':''}" data-w="${w}" data-tr="${tr}" data-dialog="${dialogId}" data-topic="${DIALOGS[dialogId].topicId}" onclick="onWordClick(event,this)">${w}</span>`;
+    text = text.replace(w, span);
+  });
+  return text;
+}
+
+function toggleTranslation(bubbleEl){
+  const line = bubbleEl.parentElement.querySelector('[data-tr]');
+  line.classList.toggle('shown');
+}
+
+/* ---- word popover ---- */
+function onWordClick(evt, el){
+  evt.stopPropagation();
+  const pop = document.getElementById('popover');
+  const word = el.dataset.w, tr = el.dataset.tr, dialogId = el.dataset.dialog, topicId = el.dataset.topic;
+  const already = flashcards.some(f=>f.word===word);
+  document.getElementById('popTr').textContent = `${word} — ${tr}`;
+  const btn = document.getElementById('popBtn');
+  btn.textContent = already ? '✓ Saved' : '+ Save as flashcard';
+  btn.className = already ? 'saved-btn' : '';
+  btn.onclick = ()=>{
+    if(!flashcards.some(f=>f.word===word)){
+      flashcards.push({word, tr, dialogId, topicId});
+    }
+    pop.classList.remove('shown');
+    refreshAllCounts();
+    renderChatPanel(dialogId); // re-render to mark word as saved
+  };
+  const rect = el.getBoundingClientRect();
+  pop.style.left = (rect.left + window.scrollX) + 'px';
+  pop.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+  pop.classList.add('shown');
+}
+document.addEventListener('click', (e)=>{
+  const pop = document.getElementById('popover');
+  if(!pop.contains(e.target)) pop.classList.remove('shown');
+});
+
+/* ---- topic tabs ---- */
+function setTopicTab(tab){
+  topicTab = tab;
+  document.getElementById('tabDialogs').classList.toggle('active', tab==='dialogs');
+  document.getElementById('tabCards').classList.toggle('active', tab==='cards');
+  document.getElementById('dialogsSubview').style.display = tab==='dialogs' ? 'grid' : 'none';
+  document.getElementById('topicCardsSubview').style.display = tab==='cards' ? 'block' : 'none';
+  if(tab==='cards') renderTopicTickets();
+}
+
+function setTopicCardScope(scope){
+  topicCardScope = scope;
+  document.getElementById('topicScopeDialog').classList.toggle('active', scope==='dialog');
+  document.getElementById('topicScopeTopic').classList.toggle('active', scope==='topic');
+  renderTopicTickets();
+}
+
+function currentTopicCardScope(){
+  if(topicCardScope==='dialog') return {type:'dialog', id:currentDialogId};
+  return {type:'topic', id:currentTopicId};
+}
+
+function renderTopicTickets(){
+  const scope = currentTopicCardScope();
+  const cards = filterCards(scope);
+  document.getElementById('topicTicketGrid').innerHTML = ticketsHTML(cards);
+  document.getElementById('topicCardCount').textContent = `(${filterCards({type:'topic', id:currentTopicId}).length})`;
+}
+
+function filterCards(scope){
+  if(scope.type==='dialog') return flashcards.filter(f=>f.dialogId===scope.id);
+  if(scope.type==='topic') return flashcards.filter(f=>f.topicId===scope.id);
+  return flashcards;
+}
+
+function ticketsHTML(cards){
+  if(!cards.length) return emptyStateHTML('No flashcards yet', 'Save a word from a dialog and it will show up here as a ticket.');
+  return cards.map(c=>`
+    <div class="ticket">
+      <div class="stub"><span>RU</span><span>✓</span></div>
+      <span class="word">${c.word}</span>
+      <div class="tr">${c.tr}</div>
+    </div>`).join('');
+}
+
+/* ================= GLOBAL FLASHCARDS VIEW ================= */
+function goGlobalFlashcards(){
+  document.getElementById('homeView').style.display='none';
+  document.getElementById('topicView').classList.remove('visible');
+  document.getElementById('globalView').classList.add('visible');
+  setNav('navCards');
+  globalScopeFilter = {type:'all', id:null};
+  renderGlobalChips();
+  renderGlobalTickets();
+}
+
+function renderGlobalChips(){
+  const usedTopics = [...new Set(flashcards.map(f=>f.topicId))];
+  let html = `<button class="chip ${globalScopeFilter.type==='all'?'active':''}" onclick="setGlobalFilter('all')">All (${flashcards.length})</button>`;
+  usedTopics.forEach(tid=>{
+    const t = TOPICS.find(x=>x.id===tid);
+    const n = flashcards.filter(f=>f.topicId===tid).length;
+    html += `<button class="chip ${globalScopeFilter.type==='topic'&&globalScopeFilter.id===tid?'active':''}" onclick="setGlobalFilter('topic','${tid}')">${t.icon} ${t.title} (${n})</button>`;
+  });
+  html += `<button class="train-btn" onclick="startTraining(globalScopeFilter.type==='all'?{type:'all'}:globalScopeFilter)">Train All ▸</button>`;
+  document.getElementById('globalChips').innerHTML = html;
+}
+function setGlobalFilter(type, id){
+  globalScopeFilter = {type, id};
+  renderGlobalChips();
+  renderGlobalTickets();
+}
+function renderGlobalTickets(){
+  const cards = globalScopeFilter.type==='all' ? flashcards : filterCards(globalScopeFilter);
+  document.getElementById('globalTicketGrid').innerHTML = cards.length ? cards.map(c=>`
+    <div class="ticket">
+      <div class="stub"><span>${TOPICS.find(t=>t.id===c.topicId).icon}</span><span>✓</span></div>
+      <span class="word">${c.word}</span>
+      <div class="tr">${c.tr}</div>
+    </div>`).join('') : emptyStateHTML('No flashcards yet', 'Words you save from any dialog will collect here.');
+}
+
+/* ================= COUNTS / NAV ================= */
+function setNav(id){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(id) document.getElementById(id).classList.add('active');
+}
+function updateGlobalCount(){
+  document.getElementById('globalCount').textContent = flashcards.length;
+}
+function refreshAllCounts(){
+  updateGlobalCount();
+  if(document.getElementById('topicView').classList.contains('visible') && topicTab==='cards') renderTopicTickets();
+  if(document.getElementById('globalView').classList.contains('visible')){ renderGlobalChips(); renderGlobalTickets(); }
+}
+
+/* ================= TRAINING ================= */
+function startTraining(scope){
+  const cards = scope.type==='all' ? flashcards.slice() : filterCards(scope);
+  if(!cards.length){ return; }
+  trainSession = { cards, index:0, flipped:false, known:0, again:0 };
+  document.getElementById('trainBackdrop').classList.add('shown');
+  renderTrainCard();
+}
+function renderTrainCard(){
+  const s = trainSession;
+  if(s.index >= s.cards.length){
+    document.getElementById('trainBody').innerHTML = `
+      <div class="summary">
+        <div class="icon" style="font-size:30px">🎟️</div>
+        <h3>Session complete</h3>
+        <p>${s.cards.length} cards reviewed · ${s.known} marked known · ${s.again} to review again</p>
+        <button class="close-modal" onclick="closeTraining()">Done</button>
+      </div>`;
+    return;
+  }
+  const c = s.cards[s.index];
+  s.flipped = false;
+  document.getElementById('trainBody').innerHTML = `
+    <div class="progress">Card ${s.index+1} of ${s.cards.length}</div>
+    <div class="flip-card" id="flipCard" onclick="flipTrainCard()">
+      <span class="side-label">Russian</span>
+      <div class="main-word">${c.word}</div>
+      <div class="sub-word">${c.tr}</div>
+      <div class="flip-hint">Tap to flip</div>
+    </div>
+    <div class="train-controls" id="trainControls" hidden>
+      <button class="btn-again" onclick="markCard(false)">Still learning</button>
+      <button class="btn-know" onclick="markCard(true)">Got it</button>
+    </div>
+    <button class="close-modal" onclick="closeTraining()">End session</button>
+  `;
+}
+function flipTrainCard(){
+  trainSession.flipped = !trainSession.flipped;
+  document.getElementById('flipCard').classList.toggle('flipped', trainSession.flipped);
+  document.getElementById('trainControls').hidden = !trainSession.flipped;
+}
+function markCard(known){
+  if(known) trainSession.known++; else trainSession.again++;
+  trainSession.index++;
+  renderTrainCard();
+}
+function closeTraining(){
+  document.getElementById('trainBackdrop').classList.remove('shown');
+  trainSession = null;
+}
+
+/* ================= INIT ================= */
+goHome();
+</script>
+</body>
+</html>
