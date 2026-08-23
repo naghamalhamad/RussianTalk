@@ -166,6 +166,35 @@ side.
 If you add more places that need to read text aloud, always reuse
 `SpeakerButton` and `speak()` — don't write a second version of this.
 
+**Reading a whole dialog out loud, one sentence after another**: the
+"🔊 Listen to full dialog" button at the top of each conversation
+(in `ChatPanel.jsx`) uses a second function in `src/speech.js`,
+`speakSequence(texts, { onStepStart, onDone })`. Give it a list of
+sentences and it reads them one at a time, only starting the next once
+the browser reports the previous one finished — like a relay race, not
+a fixed timer. `onStepStart(index)` fires right before each sentence
+starts (that's what highlights the sentence currently being read, so a
+student who glances at the screen can follow along — though the
+feature works fine audio-only, without looking, which is the main use
+case). `onDone()` fires exactly once no matter *why* it stopped:
+it finished normally, someone pressed the stop button, or something
+else interrupted it.
+
+**The "only one thing talks at a time" rule lives in `speech.js`
+itself**, not in any component: calling the ordinary `speak()`
+function (tapping any single sentence or word) automatically stops a
+`speakSequence()` that's mid-playback first. This is why tapping a
+single word's speaker button while "Listen to full dialog" is running
+correctly interrupts the full playback, without `ChatPanel.jsx` having
+to know or care that a sequence was active — and it's also why
+switching to a different dialog, or leaving the screen entirely, stops
+playback automatically: those already call `stopSpeaking()`, which now
+stops an in-progress sequence the same way. If you build another
+playback feature later (auto-play the next dialog, a playback speed
+setting, etc.), build it as another small function in `speech.js` that
+calls `speak()`/`speakSequence()` the same way, so this "only one voice
+at a time" guarantee keeps holding everywhere for free.
+
 ## 5. Things Not To Do
 
 - **Saved words are tracked globally by word text — one word equals

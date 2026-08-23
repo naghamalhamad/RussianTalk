@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { DIALOGS } from '../data.js';
-import { stopSpeaking } from '../speech.js';
+import { isSpeechSupported, speakSequence, stopSpeaking } from '../speech.js';
 import SpeakerButton from './SpeakerButton.jsx';
 
 function BubbleWords({ line, dialogId, topicId, savedWords, onWordClick }) {
@@ -47,8 +47,11 @@ export default function ChatPanel({ dialogId, flashcards, onSaveWord, onRemoveWo
   const [shownLines, setShownLines] = useState(() => new Set());
   const [hoveredLine, setHoveredLine] = useState(null);
   const [popover, setPopover] = useState(null);
+  const [playingAll, setPlayingAll] = useState(false);
+  const [activeLine, setActiveLine] = useState(null);
   const panelRef = useRef(null);
   const closeTimerRef = useRef(null);
+  const stopSequenceRef = useRef(null);
 
   function cancelPopoverClose() {
     if (closeTimerRef.current) {
@@ -65,11 +68,19 @@ export default function ChatPanel({ dialogId, flashcards, onSaveWord, onRemoveWo
   useEffect(() => {
     setShownLines(new Set());
     setPopover(null);
+    setPlayingAll(false);
+    setActiveLine(null);
+    stopSequenceRef.current = null;
     cancelPopoverClose();
     stopSpeaking();
   }, [dialogId]);
 
-  useEffect(() => cancelPopoverClose, []);
+  useEffect(() => {
+    return () => {
+      cancelPopoverClose();
+      stopSpeaking();
+    };
+  }, []);
 
   useEffect(() => {
     function handleDocClick(e) {
@@ -107,15 +118,47 @@ export default function ChatPanel({ dialogId, flashcards, onSaveWord, onRemoveWo
     });
   }
 
+  function toggleDialogPlayback() {
+    if (playingAll) {
+      stopSequenceRef.current?.();
+      stopSequenceRef.current = null;
+      setPlayingAll(false);
+      setActiveLine(null);
+      return;
+    }
+    setPopover(null);
+    setPlayingAll(true);
+    stopSequenceRef.current = speakSequence(
+      d.lines.map((line) => line.ru),
+      {
+        onStepStart: (i) => setActiveLine(i),
+        onDone: () => {
+          stopSequenceRef.current = null;
+          setPlayingAll(false);
+          setActiveLine(null);
+        },
+      }
+    );
+  }
+
   const alreadySaved = popover ? savedWords.has(popover.word) : false;
 
   return (
     <div className="chat-panel" ref={panelRef} style={{ position: 'relative' }}>
-      <h3 className="dialog-heading">{d.title}</h3>
-      <p className="dialog-sub">{d.sub}</p>
+      <div className="dialog-header">
+        <div>
+          <h3 className="dialog-heading">{d.title}</h3>
+          <p className="dialog-sub">{d.sub}</p>
+        </div>
+        {isSpeechSupported() && (
+          <button className={`play-all-btn ${playingAll ? 'playing' : ''}`} onClick={toggleDialogPlayback}>
+            {playingAll ? '⏸ Stop' : '🔊 Listen to full dialog'}
+          </button>
+        )}
+      </div>
 
       {d.lines.map((line, li) => (
-        <div className={`bubble-row ${line.side}`} key={li}>
+        <div className={`bubble-row ${line.side} ${activeLine === li ? 'reading' : ''}`} key={li}>
           <div className="bubble-wrap">
             <div className="speaker-tag">
               {line.speaker}

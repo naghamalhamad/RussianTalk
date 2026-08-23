@@ -170,6 +170,19 @@ main{flex:1; padding:24px 20px 60px;}
 .chat-panel .dialog-heading{ font-size:17px; margin:0 0 4px; }
 .chat-panel .dialog-sub{ font-size:13px; color:var(--ink-soft); margin:0 0 16px; }
 
+.dialog-header{
+  display:flex; justify-content:space-between; align-items:flex-start; gap:12px;
+}
+.dialog-header .dialog-heading, .dialog-header .dialog-sub{ margin-bottom:4px; }
+.play-all-btn{
+  border:none; background:var(--frost); color:var(--paper);
+  border-radius:999px; padding:9px 16px; font-weight:700; font-size:13px; cursor:pointer;
+  min-height:40px; white-space:nowrap; flex-shrink:0;
+}
+.play-all-btn.playing{ background:var(--ink); }
+
+.bubble-row.reading .bubble{ box-shadow:0 0 0 2px var(--frost); }
+
 .empty-state{
   text-align:center; padding:60px 20px; color:var(--ink-soft);
 }
