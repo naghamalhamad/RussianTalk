@@ -48,12 +48,28 @@ export default function ChatPanel({ dialogId, flashcards, onSaveWord, onRemoveWo
   const [hoveredLine, setHoveredLine] = useState(null);
   const [popover, setPopover] = useState(null);
   const panelRef = useRef(null);
+  const closeTimerRef = useRef(null);
+
+  function cancelPopoverClose() {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  }
+
+  function schedulePopoverClose() {
+    cancelPopoverClose();
+    closeTimerRef.current = setTimeout(() => setPopover(null), 150);
+  }
 
   useEffect(() => {
     setShownLines(new Set());
     setPopover(null);
+    cancelPopoverClose();
     stopSpeaking();
   }, [dialogId]);
+
+  useEffect(() => cancelPopoverClose, []);
 
   useEffect(() => {
     function handleDocClick(e) {
@@ -78,6 +94,7 @@ export default function ChatPanel({ dialogId, flashcards, onSaveWord, onRemoveWo
 
   function onWordClick(e, word, tr, dlgId, topicId) {
     e.stopPropagation();
+    cancelPopoverClose();
     const rect = e.currentTarget.getBoundingClientRect();
     const panelRect = panelRef.current.getBoundingClientRect();
     setPopover({
@@ -107,8 +124,14 @@ export default function ChatPanel({ dialogId, flashcards, onSaveWord, onRemoveWo
             <div
               className="bubble"
               onClick={() => toggleTranslation(li)}
-              onMouseEnter={() => setHoveredLine(li)}
-              onMouseLeave={() => setHoveredLine(null)}
+              onMouseEnter={() => {
+                setHoveredLine(li);
+                cancelPopoverClose();
+              }}
+              onMouseLeave={() => {
+                setHoveredLine(null);
+                schedulePopoverClose();
+              }}
             >
               <BubbleWords
                 line={line}
@@ -127,7 +150,12 @@ export default function ChatPanel({ dialogId, flashcards, onSaveWord, onRemoveWo
       <div className="hint-row">Hover or tap a bubble to translate the sentence · hover or tap a word to hear, translate &amp; save it</div>
 
       {popover && (
-        <div className="popover shown" style={{ top: popover.top, left: popover.left }}>
+        <div
+          className="popover shown"
+          style={{ top: popover.top, left: popover.left }}
+          onMouseEnter={cancelPopoverClose}
+          onMouseLeave={schedulePopoverClose}
+        >
           <div className="tr">
             {popover.word} — {popover.tr}
             <SpeakerButton text={popover.word} label={`Play "${popover.word}"`} />
