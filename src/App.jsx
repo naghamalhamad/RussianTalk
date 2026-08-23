@@ -13,15 +13,11 @@ export default function App() {
   const [trainingCards, setTrainingCards] = useState(null);
 
   function saveWord({ word, tr, dialogId, topicId: wordTopicId }) {
-    setFlashcards((prev) =>
-      prev.some((f) => f.word === word && f.dialogId === dialogId)
-        ? prev
-        : [...prev, { word, tr, dialogId, topicId: wordTopicId }]
-    );
+    setFlashcards((prev) => (prev.some((f) => f.word === word) ? prev : [...prev, { word, tr, dialogId, topicId: wordTopicId }]));
   }
 
-  function removeWord(dialogId, word) {
-    setFlashcards((prev) => prev.filter((f) => !(f.word === word && f.dialogId === dialogId)));
+  function removeWord(word) {
+    setFlashcards((prev) => prev.filter((f) => f.word !== word));
   }
 
   function startTraining(cards) {

@@ -9,7 +9,7 @@ export default function TicketGrid({ cards, showTopicIcon = false, emptyTitle, e
         <div className="ticket" key={`${c.word}-${i}`}>
           <div className="stub">
             <span>{showTopicIcon ? TOPICS.find((t) => t.id === c.topicId)?.icon : 'RU'}</span>
-            <button className="delete-btn" title="Remove flashcard" onClick={() => onDelete(c.dialogId, c.word)}>
+            <button className="delete-btn" title="Remove flashcard" onClick={() => onDelete(c.word)}>
               ✕
             </button>
           </div>

@@ -4,8 +4,10 @@ This document explains how the app is put together, written for someone
 who doesn't code. If you're about to add a feature, read the "Pattern
 For Adding New Features" and "Things Not To Do" sections below first.
 
-This describes the app as it stands today, after the two bugs found in
-the code audit were fixed.
+This describes the app as it stands today. It reflects a deliberate
+product decision: saved words are global, shared across every
+conversation (see the "Things Not To Do" section for why this isn't
+the same as the "please" bug that was fixed earlier the same day).
 
 ## 1. Folder Structure — What Each Piece Is For
 
@@ -82,9 +84,10 @@ A simple checklist for "where does my change go?":
    → Add the calculation to `src/selectors.js` and reuse it. Don't
    write a fresh `flashcards.filter(...)` inline in a component if a
    similar one might already exist (or should exist) in that file.
-4. **Tracking a saved word?** → Always store and check it as *the word
-   plus which conversation it came from* — never the word text by
-   itself. (This is exactly what the "please" bug was — see below.)
+4. **Tracking a saved word?** → Track it by *the word text alone* — one
+   word equals one flashcard, shared globally across every topic and
+   conversation it appears in. Don't re-introduce a "word +
+   conversation" key (see below for why).
 5. **A screen needs to remember something only it cares about** (like
    "which tab is selected" or "which dialog is open")? → Keep that
    local to that screen's own file, the same simple way every other
@@ -113,14 +116,23 @@ So new code blends in with the existing style:
 
 ## 4. Things Not To Do
 
-Rules written directly from the two bugs found and fixed today:
+- **Saved words are tracked globally by word text — one word equals
+  one flashcard, no matter how many topics or conversations it appears
+  in.** If you save "please" in one conversation, it shows as already
+  saved everywhere else "please" appears too, and there is only ever
+  one "please" flashcard in the list. This is an intentional design
+  choice, not an oversight — don't "fix" it by pairing the word with
+  which conversation it came from.
 
-- **Never identify or look up a saved word by its Russian text alone.**
-  Always pair it with which conversation (dialog) it came from. The
-  word "please" genuinely appears in three unrelated conversations —
-  treating "please" as one single thing everywhere is exactly what
-  caused a saved flashcard from one conversation to get silently
-  deleted while looking at a totally different one.
+  (Earlier the same day, the app briefly tracked words per-conversation
+  instead — a fix for what looked like a bug: saving "please" in one
+  conversation made it show as saved, and deletable, in a completely
+  different one. After reviewing it, the per-conversation behavior was
+  deliberately reversed back to global-by-word-text, because "one word,
+  one flashcard, everywhere it appears" is the intended design for this
+  app. If you're reading this and considering "fixing" the global
+  behavior again, don't — it's a confirmed decision, not a leftover
+  bug.)
 - **Never write a new counting/filtering function for flashcards if
   one already exists in `src/selectors.js`.** Add a new one there
   instead of copy-pasting the filter logic into a component. That
