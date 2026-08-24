@@ -1,4 +1,4 @@
-export default function TopBar({ view, flashcardCount, onHome, onFlashcards }) {
+export default function TopBar({ view, session, flashcardCount, onHome, onFlashcards, onAccount }) {
   return (
     <div className="topbar">
       <button className="brand" onClick={onHome}>
@@ -14,6 +14,9 @@ export default function TopBar({ view, flashcardCount, onHome, onFlashcards }) {
         </button>
         <button className={`nav-btn ${view === 'global' ? 'active' : ''}`} onClick={onFlashcards}>
           Flashcards <span className="count">{flashcardCount}</span>
+        </button>
+        <button className={`nav-btn ${view === 'account' ? 'active' : ''}`} onClick={onAccount}>
+          {session ? '👤 Account' : 'Log in'}
         </button>
       </div>
     </div>
