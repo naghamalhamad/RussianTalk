@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import SpeakerButton from './SpeakerButton.jsx';
 
 export default function TrainingModal({ cards, onClose }) {
   const [index, setIndex] = useState(0);
@@ -33,10 +34,22 @@ export default function TrainingModal({ cards, onClose }) {
               Card {index + 1} of {cards.length}
             </div>
             <div className={`flip-card ${flipped ? 'flipped' : ''}`} onClick={() => setFlipped((f) => !f)}>
-              <span className="side-label">Russian</span>
-              <div className="main-word">{cards[index].word}</div>
-              <div className="sub-word">{cards[index].tr}</div>
-              <div className="flip-hint">Tap to flip</div>
+              <div className="flip-card-inner">
+                <div className="flip-card-face flip-card-front">
+                  <span className="side-label">Russian</span>
+                  <div className="main-word">{cards[index].word}</div>
+                  <SpeakerButton
+                    text={cards[index].word}
+                    label={`Play "${cards[index].word}"`}
+                    className="train-speak-btn"
+                  />
+                  <div className="flip-hint">Tap to flip</div>
+                </div>
+                <div className="flip-card-face flip-card-back">
+                  <span className="side-label">English</span>
+                  <div className="main-word">{cards[index].tr}</div>
+                </div>
+              </div>
             </div>
             {flipped && (
               <div className="train-controls">

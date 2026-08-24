@@ -60,13 +60,14 @@ jobs.
   - `TopicView.jsx` — a single topic's screen (the Dialogs/Flashcards tabs)
   - `DialogMenu.jsx` — the sidebar list of conversations within a topic
   - `ChatPanel.jsx` — the actual chat bubbles, plus the word popover
-  - `TicketGrid.jsx` — the flashcard "ticket" grid (reused in two places);
-    it just lays cards out in a grid and delegates each individual card
-    to `FlashcardTicket.jsx`
-  - `FlashcardTicket.jsx` — one flip-able flashcard: Russian word + 🔊 on
-    the front, English translation on the back, flips when tapped
+  - `TicketGrid.jsx` — the flashcard "ticket" grid (reused in two places).
+    Each ticket is a plain card showing the Russian word and English
+    translation together — no flip, no audio icon here; that only
+    happens in the training quiz (see `TrainingModal.jsx` below).
   - `GlobalFlashcards.jsx` — the "All flashcards" screen
-  - `TrainingModal.jsx` — the flip-card quiz popup
+  - `TrainingModal.jsx` — the "Train All" quiz popup: one flip-able card
+    at a time, Russian word + 🔊 on the front, English translation on
+    the back, flips when tapped
   - `EmptyState.jsx` — the small "nothing here yet" placeholder message
   - `SpeakerButton.jsx` — the reusable 🔊 button that reads a piece of
     text out loud when tapped. Any new "read this aloud" button
@@ -170,18 +171,28 @@ side.
 If you add more places that need to read text aloud, always reuse
 `SpeakerButton` and `speak()` — don't write a second version of this.
 
-**How the flip-card's audio button avoids flipping the card**: each
-saved flashcard (`FlashcardTicket.jsx`) flips over when you tap it
-anywhere, but it also has a 🔊 button on the front (reusing
-`SpeakerButton`, not a new one) so you can hear the word without
-flipping to see the answer. This works with no extra code because
+**How the training quiz's audio button avoids flipping the card**:
+the "Train All" quiz (`TrainingModal.jsx`) shows one flip-able card at
+a time — tapping it anywhere flips it from the Russian word to the
+English translation, using a real 3D CSS flip (`perspective` +
+`rotateY` + `backface-visibility`, the same technique as everywhere
+else a flip is needed in this app). The front also has a 🔊 button
+(reusing `SpeakerButton`, not a new one) so a student can hear the
+word before deciding to flip. This works with no extra code because
 `SpeakerButton` already stops its click from "bubbling up" to
 whatever it's sitting inside (`e.stopPropagation()`) — that's what
-lets it live safely inside the popover's "Save" button too. So the
-card's own "tap anywhere to flip" handler never even hears about a
-tap that landed on the speaker button; it only reacts to taps
+lets it live safely inside the word popover's "Save" button too. So
+the card's own "tap anywhere to flip" handler never even hears about
+a tap that landed on the speaker button; it only reacts to taps
 elsewhere on the card. Nothing new was invented for this — it's the
 same reuse pattern used everywhere else in this section.
+
+Note this flip/audio behavior lives only in the training quiz. The
+"All flashcards" ticket grid (`TicketGrid.jsx`) is deliberately plain
+— it shows the Russian word and English translation together on one
+static card, with no flip and no audio icon. If you're tempted to add
+flip/audio there too, check with whoever's driving the product first —
+it was tried once and explicitly moved to the training quiz instead.
 
 **Reading a whole dialog out loud, one sentence after another**: the
 "🔊 Listen to full dialog" button at the top of each conversation
