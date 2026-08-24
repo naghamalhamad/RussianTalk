@@ -60,7 +60,11 @@ jobs.
   - `TopicView.jsx` — a single topic's screen (the Dialogs/Flashcards tabs)
   - `DialogMenu.jsx` — the sidebar list of conversations within a topic
   - `ChatPanel.jsx` — the actual chat bubbles, plus the word popover
-  - `TicketGrid.jsx` — the flashcard "ticket" grid (reused in two places)
+  - `TicketGrid.jsx` — the flashcard "ticket" grid (reused in two places);
+    it just lays cards out in a grid and delegates each individual card
+    to `FlashcardTicket.jsx`
+  - `FlashcardTicket.jsx` — one flip-able flashcard: Russian word + 🔊 on
+    the front, English translation on the back, flips when tapped
   - `GlobalFlashcards.jsx` — the "All flashcards" screen
   - `TrainingModal.jsx` — the flip-card quiz popup
   - `EmptyState.jsx` — the small "nothing here yet" placeholder message
@@ -165,6 +169,19 @@ side.
 
 If you add more places that need to read text aloud, always reuse
 `SpeakerButton` and `speak()` — don't write a second version of this.
+
+**How the flip-card's audio button avoids flipping the card**: each
+saved flashcard (`FlashcardTicket.jsx`) flips over when you tap it
+anywhere, but it also has a 🔊 button on the front (reusing
+`SpeakerButton`, not a new one) so you can hear the word without
+flipping to see the answer. This works with no extra code because
+`SpeakerButton` already stops its click from "bubbling up" to
+whatever it's sitting inside (`e.stopPropagation()`) — that's what
+lets it live safely inside the popover's "Save" button too. So the
+card's own "tap anywhere to flip" handler never even hears about a
+tap that landed on the speaker button; it only reacts to taps
+elsewhere on the card. Nothing new was invented for this — it's the
+same reuse pattern used everywhere else in this section.
 
 **Reading a whole dialog out loud, one sentence after another**: the
 "🔊 Listen to full dialog" button at the top of each conversation
