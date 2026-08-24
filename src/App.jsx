@@ -6,23 +6,55 @@ import GlobalFlashcards from './components/GlobalFlashcards.jsx';
 import TrainingModal from './components/TrainingModal.jsx';
 import AccountView from './components/AccountView.jsx';
 import { subscribeToAuthChanges } from './auth.js';
-import { INITIAL_FLASHCARDS } from './data.js';
+import { addFlashcard, loadFlashcards, removeFlashcard } from './flashcardsApi.js';
 
 export default function App() {
   const [view, setView] = useState('home'); // 'home' | 'topic' | 'global' | 'account'
   const [topicId, setTopicId] = useState(null);
-  const [flashcards, setFlashcards] = useState(INITIAL_FLASHCARDS);
+  const [flashcards, setFlashcards] = useState([]);
   const [trainingCards, setTrainingCards] = useState(null);
   const [session, setSession] = useState(null);
 
   useEffect(() => subscribeToAuthChanges(setSession), []);
 
-  function saveWord({ word, tr, dialogId, topicId: wordTopicId }) {
-    setFlashcards((prev) => (prev.some((f) => f.word === word) ? prev : [...prev, { word, tr, dialogId, topicId: wordTopicId }]));
+  const userId = session?.user?.id ?? null;
+
+  // Load this student's saved words whenever who's logged in changes (not on
+  // every session refresh - only when the actual logged-in user changes).
+  useEffect(() => {
+    if (!userId) {
+      setFlashcards([]);
+      return;
+    }
+    let cancelled = false;
+    loadFlashcards().then(({ data, error }) => {
+      if (cancelled || error) return;
+      setFlashcards(data.map((row) => ({ word: row.word, tr: row.translation, dialogId: row.dialog_id, topicId: row.topic_id })));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  async function saveWord({ word, tr, dialogId, topicId: wordTopicId }) {
+    if (!userId || flashcards.some((f) => f.word === word)) return;
+    setFlashcards((prev) => [...prev, { word, tr, dialogId, topicId: wordTopicId }]);
+    const { error } = await addFlashcard({ userId, word, translation: tr, dialogId, topicId: wordTopicId });
+    // Ignore "already saved" conflicts (code 23505) - that's a harmless race,
+    // not a real failure. Roll back the optimistic update for anything else.
+    if (error && error.code !== '23505') {
+      setFlashcards((prev) => prev.filter((f) => f.word !== word));
+    }
   }
 
-  function removeWord(word) {
+  async function removeWord(word) {
+    if (!userId) return;
+    const removed = flashcards.find((f) => f.word === word);
     setFlashcards((prev) => prev.filter((f) => f.word !== word));
+    const { error } = await removeFlashcard(word);
+    if (error && removed) {
+      setFlashcards((prev) => [...prev, removed]);
+    }
   }
 
   function startTraining(cards) {
@@ -53,8 +85,10 @@ export default function App() {
           <TopicView
             topicId={topicId}
             flashcards={flashcards}
+            loggedIn={!!userId}
             onSaveWord={saveWord}
             onRemoveWord={removeWord}
+            onRequireLogin={() => setView('account')}
             onBack={() => setView('home')}
             onStartTraining={startTraining}
           />

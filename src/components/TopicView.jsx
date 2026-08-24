@@ -6,7 +6,7 @@ import TicketGrid from './TicketGrid.jsx';
 import EmptyState from './EmptyState.jsx';
 import { cardsForDialog, cardsForTopic } from '../selectors.js';
 
-export default function TopicView({ topicId, flashcards, onSaveWord, onRemoveWord, onBack, onStartTraining }) {
+export default function TopicView({ topicId, flashcards, loggedIn, onSaveWord, onRemoveWord, onRequireLogin, onBack, onStartTraining }) {
   const topic = TOPICS.find((t) => t.id === topicId);
   const [tab, setTab] = useState('dialogs');
   const [dialogId, setDialogId] = useState(topic.dialogs[0] ?? null);
@@ -43,7 +43,14 @@ export default function TopicView({ topicId, flashcards, onSaveWord, onRemoveWor
         <div className="topic-layout">
           <DialogMenu topic={topic} currentDialogId={dialogId} flashcards={flashcards} onOpenDialog={setDialogId} />
           {dialogId ? (
-            <ChatPanel dialogId={dialogId} flashcards={flashcards} onSaveWord={onSaveWord} onRemoveWord={onRemoveWord} />
+            <ChatPanel
+              dialogId={dialogId}
+              flashcards={flashcards}
+              loggedIn={loggedIn}
+              onSaveWord={onSaveWord}
+              onRemoveWord={onRemoveWord}
+              onRequireLogin={onRequireLogin}
+            />
           ) : (
             <div className="chat-panel">
               <EmptyState
