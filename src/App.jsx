@@ -29,29 +29,39 @@ export default function App() {
     let cancelled = false;
     loadFlashcards().then(({ data, error }) => {
       if (cancelled || error) return;
-      setFlashcards(data.map((row) => ({ word: row.word, tr: row.translation, dialogId: row.dialog_id, topicId: row.topic_id })));
+      setFlashcards(
+        data.map((row) => ({
+          word: row.word, tr: row.translation, dialogId: row.dialog_id, topicId: row.topic_id,
+          // Rows saved before the `type` column existed (or the column not
+          // existing yet at all) are word flashcards - that was the only kind.
+          type: row.type ?? 'word',
+        }))
+      );
     });
     return () => {
       cancelled = true;
     };
   }, [userId]);
 
-  async function saveWord({ word, tr, dialogId, topicId: wordTopicId }) {
-    if (!userId || flashcards.some((f) => f.word === word)) return;
-    setFlashcards((prev) => [...prev, { word, tr, dialogId, topicId: wordTopicId }]);
-    const { error } = await addFlashcard({ userId, word, translation: tr, dialogId, topicId: wordTopicId });
+  // Shared by both word flashcards and sentence flashcards - `type` is the
+  // only thing that tells them apart. A word flashcard's `word` field holds
+  // a single Russian word; a sentence flashcard's holds the whole sentence.
+  async function saveCard({ word, tr, dialogId, topicId: cardTopicId, type = 'word' }) {
+    if (!userId || flashcards.some((f) => f.word === word && f.type === type)) return;
+    setFlashcards((prev) => [...prev, { word, tr, dialogId, topicId: cardTopicId, type }]);
+    const { error } = await addFlashcard({ userId, word, translation: tr, dialogId, topicId: cardTopicId, type });
     // Ignore "already saved" conflicts (code 23505) - that's a harmless race,
     // not a real failure. Roll back the optimistic update for anything else.
     if (error && error.code !== '23505') {
-      setFlashcards((prev) => prev.filter((f) => f.word !== word));
+      setFlashcards((prev) => prev.filter((f) => !(f.word === word && f.type === type)));
     }
   }
 
-  async function removeWord(word) {
+  async function removeCard(word, type = 'word') {
     if (!userId) return;
-    const removed = flashcards.find((f) => f.word === word);
-    setFlashcards((prev) => prev.filter((f) => f.word !== word));
-    const { error } = await removeFlashcard(word);
+    const removed = flashcards.find((f) => f.word === word && f.type === type);
+    setFlashcards((prev) => prev.filter((f) => !(f.word === word && f.type === type)));
+    const { error } = await removeFlashcard(word, type);
     if (error && removed) {
       setFlashcards((prev) => [...prev, removed]);
     }
@@ -86,8 +96,8 @@ export default function App() {
             topicId={topicId}
             flashcards={flashcards}
             loggedIn={!!userId}
-            onSaveWord={saveWord}
-            onRemoveWord={removeWord}
+            onSaveCard={saveCard}
+            onRemoveCard={removeCard}
             onRequireLogin={() => setView('account')}
             onBack={() => setView('home')}
             onStartTraining={startTraining}
@@ -96,7 +106,7 @@ export default function App() {
         {view === 'global' && (
           <GlobalFlashcards
             flashcards={flashcards}
-            onRemoveWord={removeWord}
+            onRemoveCard={removeCard}
             onBack={() => setView('home')}
             onStartTraining={startTraining}
           />

@@ -42,7 +42,7 @@ function BubbleWords({ line, dialogId, topicId, savedWords, onWordClick }) {
   );
 }
 
-export default function ChatPanel({ dialogId, flashcards, loggedIn, onSaveWord, onRemoveWord, onRequireLogin }) {
+export default function ChatPanel({ dialogId, flashcards, loggedIn, onSaveCard, onRemoveCard, onRequireLogin }) {
   const d = DIALOGS[dialogId];
   const [shownLines, setShownLines] = useState(() => new Set());
   const [hoveredLine, setHoveredLine] = useState(null);
@@ -92,7 +92,11 @@ export default function ChatPanel({ dialogId, flashcards, loggedIn, onSaveWord, 
     return () => document.removeEventListener('click', handleDocClick);
   }, []);
 
-  const savedWords = new Set(flashcards.map((f) => f.word));
+  // A flashcard's type tells a saved word apart from a saved sentence - two
+  // separate "already saved" sets, so a sentence never lights up as a saved
+  // word (or vice versa) just because the text happens to match.
+  const savedWords = new Set(flashcards.filter((f) => f.type !== 'sentence').map((f) => f.word));
+  const savedSentences = new Set(flashcards.filter((f) => f.type === 'sentence').map((f) => f.word));
 
   function toggleTranslation(li) {
     setShownLines((prev) => {
@@ -163,6 +167,22 @@ export default function ChatPanel({ dialogId, flashcards, loggedIn, onSaveWord, 
             <div className="speaker-tag">
               {line.speaker}
               <SpeakerButton text={line.ru} label="Play sentence" />
+              <button
+                type="button"
+                className={`sentence-save-btn ${savedSentences.has(line.ru) ? 'saved' : ''}`}
+                title={savedSentences.has(line.ru) ? 'Remove sentence flashcard' : 'Save whole sentence as flashcard'}
+                onClick={() => {
+                  if (!loggedIn) {
+                    onRequireLogin();
+                  } else if (savedSentences.has(line.ru)) {
+                    onRemoveCard(line.ru, 'sentence');
+                  } else {
+                    onSaveCard({ word: line.ru, tr: line.tr, dialogId, topicId: d.topicId, type: 'sentence' });
+                  }
+                }}
+              >
+                🔖
+              </button>
             </div>
             <div
               className="bubble"
@@ -209,9 +229,9 @@ export default function ChatPanel({ dialogId, flashcards, loggedIn, onSaveWord, 
               if (!loggedIn) {
                 onRequireLogin();
               } else if (alreadySaved) {
-                onRemoveWord(popover.word);
+                onRemoveCard(popover.word, 'word');
               } else {
-                onSaveWord(popover);
+                onSaveCard({ ...popover, type: 'word' });
               }
               setPopover(null);
             }}

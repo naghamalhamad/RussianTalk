@@ -59,11 +59,15 @@ jobs.
   - `Home.jsx` — the grid of topic cards you see first
   - `TopicView.jsx` — a single topic's screen (the Dialogs/Flashcards tabs)
   - `DialogMenu.jsx` — the sidebar list of conversations within a topic
-  - `ChatPanel.jsx` — the actual chat bubbles, plus the word popover
+  - `ChatPanel.jsx` — the actual chat bubbles, the word popover, and
+    the per-sentence save button
   - `TicketGrid.jsx` — the flashcard "ticket" grid (reused in two places).
-    Each ticket is a plain card showing the Russian word and English
-    translation together — no flip, no audio icon here; that only
-    happens in the training quiz (see `TrainingModal.jsx` below).
+    Each ticket is a plain card showing the Russian text (a word, or a
+    whole sentence) and English translation together — no flip, no
+    audio icon here; that only happens in the training quiz (see
+    `TrainingModal.jsx` below). A small "Word"/"Sentence" tag on each
+    ticket shows which kind it is (see "How Sentence Flashcards Work"
+    further down).
   - `GlobalFlashcards.jsx` — the "All flashcards" screen
   - `TrainingModal.jsx` — the "Train All" quiz popup: one flip-able card
     at a time, Russian word + 🔊 on the front, English translation on
@@ -98,10 +102,13 @@ A simple checklist for "where does my change go?":
    → Add the calculation to `src/selectors.js` and reuse it. Don't
    write a fresh `flashcards.filter(...)` inline in a component if a
    similar one might already exist (or should exist) in that file.
-4. **Tracking a saved word?** → Track it by *the word text alone* — one
-   word equals one flashcard, shared globally across every topic and
-   conversation it appears in. Don't re-introduce a "word +
-   conversation" key (see below for why).
+4. **Tracking a saved word or sentence?** → Track it by *its text plus
+   its type* (`word` or `sentence`) — one word equals one flashcard,
+   shared globally across every topic and conversation it appears in,
+   and separately, one sentence equals one flashcard the same way. See
+   "How Sentence Flashcards Work Alongside Word Flashcards" below.
+   Don't re-introduce a "word + conversation" key (see "Things Not To
+   Do" for why).
 5. **A screen needs to remember something only it cares about** (like
    "which tab is selected" or "which dialog is open")? → Keep that
    local to that screen's own file, the same simple way every other
@@ -128,9 +135,10 @@ So new code blends in with the existing style:
 - **Topic IDs**: a single lowercase word — e.g. `"cafes"`,
   `"shopping"`.
 - **"Something happened" functions passed between screens**: always
-  start with `on` — e.g. `onSaveWord`, `onRemoveWord`, `onOpenTopic`.
+  start with `on` — e.g. `onSaveCard`, `onRemoveCard`, `onOpenTopic`.
   This is how a child screen tells the parent "the user did a thing,
-  you decide what happens."
+  you decide what happens." (`onSaveCard`/`onRemoveCard` handle both
+  word flashcards and sentence flashcards — see below.)
 
 ## 4. How Audio Playback Works
 
@@ -223,7 +231,48 @@ setting, etc.), build it as another small function in `speech.js` that
 calls `speak()`/`speakSequence()` the same way, so this "only one voice
 at a time" guarantee keeps holding everywhere for free.
 
-## 5. Things Not To Do
+## 5. How Sentence Flashcards Work Alongside Word Flashcards
+
+A student can save two kinds of flashcard: a single word (the original
+feature) or a whole sentence. Both use the exact same flashcard shape
+— `{ word, tr, dialogId, topicId, type }` — the only new thing is
+`type`, which is either `'word'` or `'sentence'`. For a sentence
+flashcard, the `word` field just holds the whole Russian sentence
+instead of one word; nothing else about the shape changes.
+
+Because of that, almost nothing had to be duplicated:
+
+- **The training quiz's flip card doesn't know or care.** It just
+  puts `.word` on the front (with a speaker button) and `.tr` on the
+  back — that was already true before sentence flashcards existed, so
+  `TrainingModal.jsx` needed zero changes to support them.
+- **Saving/removing is one function each**, `saveCard`/`removeCard`
+  in `App.jsx` (exposed to screens as `onSaveCard`/`onRemoveCard`),
+  used for both kinds. They accept a `type` (defaulting to `'word'`
+  if you don't pass one), and treat "is this already saved" as
+  matching *both* the text and the type — so a word and a sentence
+  are never confused with each other, even in the unlikely case their
+  text matched.
+- **The sentence-save button** (the 🔖 icon next to each sentence's
+  🔊 button in `ChatPanel.jsx`) reuses the exact same
+  save/remove/require-login decision the word popover already made —
+  it's not a new rule, just the existing one applied to a sentence's
+  text instead of a word's.
+- **The "All flashcards" list** (`TicketGrid.jsx`) shows a small
+  "Word" or "Sentence" tag on each ticket (reusing the same
+  blue/green color tokens used elsewhere in the app) so the two kinds
+  are easy to tell apart while still living in the same list.
+
+**Database note**: sentence flashcards need one extra column
+(`type`) in the Supabase `flashcards` table, added via a one-time SQL
+script (handed over the same way the original table setup was).
+Word-saving was deliberately built to keep working normally even
+before that SQL has been run — only saving a *sentence* depends on
+it; trying to save one before the column exists just fails quietly
+(the same as any other database hiccup this app already handles) and
+doesn't affect word flashcards at all.
+
+## 6. Things Not To Do
 
 - **Saved words are tracked globally by word text — one word equals
   one flashcard, no matter how many topics or conversations it appears
@@ -231,7 +280,16 @@ at a time" guarantee keeps holding everywhere for free.
   saved everywhere else "please" appears too, and there is only ever
   one "please" flashcard in the list. This is an intentional design
   choice, not an oversight — don't "fix" it by pairing the word with
-  which conversation it came from.
+  which conversation it came from. (Sentence flashcards follow the
+  same "global by text" rule, just in their own separate `type`, so a
+  saved sentence and a saved word never collide with each other — see
+  "How Sentence Flashcards Work Alongside Word Flashcards" above.)
+- **Don't write a new save/remove function for a new kind of
+  flashcard.** `saveCard`/`removeCard` in `App.jsx` already handle any
+  flashcard shaped like `{ word, tr, dialogId, topicId, type }` — add
+  a new `type` value and reuse them, the same way sentence flashcards
+  reused them instead of getting their own `saveSentence`/
+  `removeSentence` functions.
 
   (Earlier the same day, the app briefly tracked words per-conversation
   instead — a fix for what looked like a bug: saving "please" in one

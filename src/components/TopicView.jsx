@@ -6,7 +6,7 @@ import TicketGrid from './TicketGrid.jsx';
 import EmptyState from './EmptyState.jsx';
 import { cardsForDialog, cardsForTopic } from '../selectors.js';
 
-export default function TopicView({ topicId, flashcards, loggedIn, onSaveWord, onRemoveWord, onRequireLogin, onBack, onStartTraining }) {
+export default function TopicView({ topicId, flashcards, loggedIn, onSaveCard, onRemoveCard, onRequireLogin, onBack, onStartTraining }) {
   const topic = TOPICS.find((t) => t.id === topicId);
   const [tab, setTab] = useState('dialogs');
   const [dialogId, setDialogId] = useState(topic.dialogs[0] ?? null);
@@ -47,8 +47,8 @@ export default function TopicView({ topicId, flashcards, loggedIn, onSaveWord, o
               dialogId={dialogId}
               flashcards={flashcards}
               loggedIn={loggedIn}
-              onSaveWord={onSaveWord}
-              onRemoveWord={onRemoveWord}
+              onSaveCard={onSaveCard}
+              onRemoveCard={onRemoveCard}
               onRequireLogin={onRequireLogin}
             />
           ) : (
@@ -75,7 +75,7 @@ export default function TopicView({ topicId, flashcards, loggedIn, onSaveWord, o
           </div>
           <TicketGrid
             cards={scopedCards}
-            onDelete={onRemoveWord}
+            onDelete={onRemoveCard}
             emptyTitle="No flashcards yet"
             emptyBody="Save a word from a dialog and it will show up here as a ticket."
           />
