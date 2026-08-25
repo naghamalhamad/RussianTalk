@@ -19,12 +19,12 @@ html,body{margin:0;padding:0;}
 body{
   background:var(--bg);
   color:var(--ink);
-  font-family:'PT Sans', sans-serif;
+  font-family:'Poppins', sans-serif;
   font-size:16px;
   line-height:1.5;
   -webkit-font-smoothing:antialiased;
 }
-h1,h2,h3,.display{font-family:'PT Serif', serif;}
+h1,h2,h3,.display{font-family:'Poppins', sans-serif;}
 button{font-family:inherit;}
 :focus-visible{outline:2px solid var(--frost); outline-offset:2px;}
 
@@ -56,9 +56,9 @@ button{font-family:inherit;}
   background:var(--amber);
   color:var(--paper);
   display:flex;align-items:center;justify-content:center;
-  font-family:'PT Serif',serif; font-weight:700; font-size:18px;
+  font-family:'Poppins',sans-serif; font-weight:700; font-size:18px;
 }
-.brand .name{font-family:'PT Serif',serif; font-weight:700; font-size:20px; color:var(--ink);}
+.brand .name{font-family:'Poppins',sans-serif; font-weight:700; font-size:20px; color:var(--ink);}
 .brand .tag{font-size:12px; color:var(--ink-soft); display:block; margin-top:-2px;}
 .nav-actions{display:flex; gap:8px;}
 .nav-btn{
@@ -302,7 +302,7 @@ main{flex:1; padding:24px 20px 60px;}
 }
 .ticket .card-type.is-word{ background:var(--frost-tint); color:var(--frost); }
 .ticket .card-type.is-sentence{ background:var(--sage-tint); color:var(--sage); }
-.ticket .word{ display:block; border:none; padding:14px 0 4px; font-family:'PT Serif',serif; font-size:18px; cursor:default; }
+.ticket .word{ display:block; border:none; padding:14px 0 4px; font-family:'Poppins',sans-serif; font-size:18px; cursor:default; }
 .ticket .tr{ font-size:12.5px; color:var(--ink-soft); }
 
 /* ===== Training modal ===== */
@@ -335,7 +335,7 @@ main{flex:1; padding:24px 20px 60px;}
   position:absolute; top:12px; left:14px; font-size:10px; text-transform:uppercase;
   letter-spacing:.05em; color:var(--ink-soft); font-weight:700;
 }
-.flip-card .main-word{ font-family:'PT Serif',serif; font-size:26px; margin-top:10px; text-align:center; }
+.flip-card .main-word{ font-family:'Poppins',sans-serif; font-size:26px; margin-top:10px; text-align:center; }
 .train-speak-btn{ font-size:20px; margin-top:12px; }
 .flip-hint{ font-size:12px; color:var(--ink-soft); margin-top:10px; }
 
