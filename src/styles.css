@@ -24,7 +24,7 @@ body{
   line-height:1.5;
   -webkit-font-smoothing:antialiased;
 }
-h1,h2,h3,.display{font-family:'Poppins', sans-serif;}
+h1,h2,h3,.display{font-family:'Poppins', sans-serif; font-weight:500;}
 button{font-family:inherit;}
 :focus-visible{outline:2px solid var(--frost); outline-offset:2px;}
 
@@ -56,21 +56,21 @@ button{font-family:inherit;}
   background:var(--amber);
   color:var(--paper);
   display:flex;align-items:center;justify-content:center;
-  font-family:'Poppins',sans-serif; font-weight:700; font-size:18px;
+  font-family:'Poppins',sans-serif; font-weight:500; font-size:18px;
 }
-.brand .name{font-family:'Poppins',sans-serif; font-weight:700; font-size:20px; color:var(--ink);}
+.brand .name{font-family:'Poppins',sans-serif; font-weight:500; font-size:20px; color:var(--ink);}
 .brand .tag{font-size:12px; color:var(--ink-soft); display:block; margin-top:-2px;}
 .nav-actions{display:flex; gap:8px;}
 .nav-btn{
   display:flex; align-items:center; gap:6px;
   border:1px solid var(--line); background:var(--paper);
-  border-radius:999px; padding:9px 16px; font-size:14px; font-weight:700;
+  border-radius:999px; padding:9px 16px; font-size:14px; font-weight:500;
   color:var(--ink); cursor:pointer; min-height:44px;
 }
 .nav-btn.active{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
 .nav-btn .count{
   background:var(--amber); color:var(--paper); border-radius:999px;
-  font-size:11px; padding:1px 7px; font-weight:700;
+  font-size:11px; padding:1px 7px; font-weight:500;
 }
 .nav-btn.active .count{ background:var(--amber); }
 
@@ -111,7 +111,7 @@ main{flex:1; padding:24px 20px 60px;}
   margin-top:10px; font-size:12px; color:var(--ink-soft);
   display:flex; align-items:center; gap:6px;
 }
-.topic-card .meta.ready{ color:var(--sage); font-weight:700; }
+.topic-card .meta.ready{ color:var(--sage); font-weight:500; }
 
 /* ===== Topic detail layout ===== */
 .back-row{
@@ -119,7 +119,7 @@ main{flex:1; padding:24px 20px 60px;}
 }
 .back-btn{
   border:1px solid var(--line); background:var(--paper); border-radius:10px;
-  padding:8px 14px; font-size:14px; font-weight:700; cursor:pointer; min-height:40px;
+  padding:8px 14px; font-size:14px; font-weight:500; cursor:pointer; min-height:40px;
 }
 .topic-title{font-size:22px; margin:0;}
 .topic-title .ru{ color:var(--ink-soft); font-size:14px; font-weight:400; margin-left:8px;}
@@ -127,7 +127,7 @@ main{flex:1; padding:24px 20px 60px;}
 .topic-tabs{ display:flex; gap:8px; margin:16px 0; }
 .topic-tab{
   border:1px solid var(--line); background:var(--paper); border-radius:999px;
-  padding:8px 16px; font-size:14px; font-weight:700; cursor:pointer; min-height:40px;
+  padding:8px 16px; font-size:14px; font-weight:500; cursor:pointer; min-height:40px;
 }
 .topic-tab.active{ background:var(--frost); color:var(--paper); border-color:var(--frost); }
 
@@ -147,7 +147,7 @@ main{flex:1; padding:24px 20px 60px;}
 }
 .dialog-menu .heading{
   padding:12px 14px; font-size:12px; text-transform:uppercase; letter-spacing:.04em;
-  color:var(--ink-soft); border-bottom:1px solid var(--line); font-weight:700;
+  color:var(--ink-soft); border-bottom:1px solid var(--line); font-weight:500;
 }
 .dialog-item{
   display:flex; justify-content:space-between; align-items:center; gap:8px;
@@ -156,10 +156,10 @@ main{flex:1; padding:24px 20px 60px;}
   min-height:44px;
 }
 .dialog-item:last-child{ border-bottom:none; }
-.dialog-item.active{ background:var(--amber-tint); font-weight:700; }
+.dialog-item.active{ background:var(--amber-tint); font-weight:500; }
 .dialog-item .badge{
   font-size:11px; background:var(--sage-tint); color:var(--sage); border-radius:999px;
-  padding:1px 7px; font-weight:700;
+  padding:1px 7px; font-weight:500;
 }
 
 /* ===== Chat panel ===== */
@@ -176,7 +176,7 @@ main{flex:1; padding:24px 20px 60px;}
 .dialog-header .dialog-heading, .dialog-header .dialog-sub{ margin-bottom:4px; }
 .play-all-btn{
   border:none; background:var(--frost); color:var(--paper);
-  border-radius:999px; padding:9px 16px; font-weight:700; font-size:13px; cursor:pointer;
+  border-radius:999px; padding:9px 16px; font-weight:500; font-size:13px; cursor:pointer;
   min-height:40px; white-space:nowrap; flex-shrink:0;
 }
 .play-all-btn.playing{ background:var(--ink); }
@@ -195,7 +195,7 @@ main{flex:1; padding:24px 20px 60px;}
 }
 .bubble-row.right{ justify-content:flex-end; }
 .speaker-tag{
-  font-size:11px; color:var(--ink-soft); margin-bottom:4px; font-weight:700;
+  font-size:11px; color:var(--ink-soft); margin-bottom:4px; font-weight:500;
   display:flex; align-items:center; gap:6px;
 }
 .bubble-row.right .speaker-tag{ justify-content:flex-end; }
@@ -250,7 +250,7 @@ main{flex:1; padding:24px 20px 60px;}
   border-radius:10px; padding:10px 12px; font-size:13px; box-shadow:0 8px 20px rgba(0,0,0,.25);
   min-width:150px;
 }
-.popover .tr{ font-weight:700; margin-bottom:8px; }
+.popover .tr{ font-weight:500; margin-bottom:8px; }
 .popover .tr .speaker-btn{
   width:auto; background:none; color:var(--paper); opacity:.85;
   padding:0; margin-left:6px; border-radius:0; min-height:auto; font-weight:400;
@@ -258,7 +258,7 @@ main{flex:1; padding:24px 20px 60px;}
 .popover .tr .speaker-btn:hover{ opacity:1; }
 .popover button{
   width:100%; border:none; border-radius:7px; background:var(--amber); color:var(--paper);
-  padding:7px 10px; font-size:12.5px; font-weight:700; cursor:pointer; min-height:32px;
+  padding:7px 10px; font-size:12.5px; font-weight:500; cursor:pointer; min-height:32px;
 }
 .popover button.saved-btn{ background:var(--sage); }
 
@@ -266,13 +266,13 @@ main{flex:1; padding:24px 20px 60px;}
 .fc-toolbar{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:16px; }
 .chip{
   border:1px solid var(--line); background:var(--paper); border-radius:999px;
-  padding:7px 14px; font-size:13px; cursor:pointer; font-weight:700; color:var(--ink-soft);
+  padding:7px 14px; font-size:13px; cursor:pointer; font-weight:500; color:var(--ink-soft);
   min-height:36px;
 }
 .chip.active{ background:var(--ink); color:var(--paper); border-color:var(--ink); }
 .train-btn{
   margin-left:auto; border:none; background:var(--sage); color:var(--paper);
-  border-radius:999px; padding:10px 18px; font-weight:700; font-size:14px; cursor:pointer;
+  border-radius:999px; padding:10px 18px; font-weight:500; font-size:14px; cursor:pointer;
   min-height:44px;
 }
 
@@ -289,7 +289,7 @@ main{flex:1; padding:24px 20px 60px;}
 }
 .ticket .stub{
   font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft);
-  display:flex; justify-content:space-between; align-items:center; padding-bottom:8px; font-weight:700;
+  display:flex; justify-content:space-between; align-items:center; padding-bottom:8px; font-weight:500;
 }
 .ticket .delete-btn{
   border:none; background:none; color:var(--ink-soft); cursor:pointer;
@@ -297,7 +297,7 @@ main{flex:1; padding:24px 20px 60px;}
 }
 .ticket .delete-btn:hover{ color:#B23A3A; }
 .ticket .card-type{
-  font-size:9px; text-transform:uppercase; letter-spacing:.03em; font-weight:700;
+  font-size:9px; text-transform:uppercase; letter-spacing:.03em; font-weight:500;
   border-radius:999px; padding:2px 7px;
 }
 .ticket .card-type.is-word{ background:var(--frost-tint); color:var(--frost); }
@@ -314,7 +314,7 @@ main{flex:1; padding:24px 20px 60px;}
   background:var(--bg); border-radius:18px; padding:22px; width:100%; max-width:380px;
   text-align:center;
 }
-.train-modal .progress{ font-size:12px; color:var(--ink-soft); margin-bottom:14px; font-weight:700; }
+.train-modal .progress{ font-size:12px; color:var(--ink-soft); margin-bottom:14px; font-weight:500; }
 /* Flip mechanics: .flip-card holds the 3D perspective, .flip-card-inner is
    the piece that actually rotates, and the two faces are stacked absolutely
    inside it so only one is visible (facing the viewer) at a time. */
@@ -333,7 +333,7 @@ main{flex:1; padding:24px 20px 60px;}
 .flip-card-back{ transform:rotateY(180deg); }
 .flip-card .side-label{
   position:absolute; top:12px; left:14px; font-size:10px; text-transform:uppercase;
-  letter-spacing:.05em; color:var(--ink-soft); font-weight:700;
+  letter-spacing:.05em; color:var(--ink-soft); font-weight:500;
 }
 .flip-card .main-word{ font-family:'Poppins',sans-serif; font-size:26px; margin-top:10px; text-align:center; }
 .train-speak-btn{ font-size:20px; margin-top:12px; }
@@ -344,7 +344,7 @@ main{flex:1; padding:24px 20px 60px;}
 }
 .train-controls{ display:flex; gap:10px; margin-top:16px; }
 .train-controls button{
-  flex:1; border-radius:999px; border:none; padding:12px; font-weight:700; font-size:14px;
+  flex:1; border-radius:999px; border:none; padding:12px; font-weight:500; font-size:14px;
   cursor:pointer; min-height:44px;
 }
 .btn-again{ background:var(--frost-tint); color:var(--frost); }
@@ -361,7 +361,7 @@ main{flex:1; padding:24px 20px 60px;}
   display:flex; flex-direction:column; gap:14px; max-width:360px; margin-top:16px;
 }
 .account-form label{
-  display:flex; flex-direction:column; gap:6px; font-size:13px; font-weight:700; color:var(--ink-soft);
+  display:flex; flex-direction:column; gap:6px; font-size:13px; font-weight:500; color:var(--ink-soft);
 }
 .account-form input{
   font-family:inherit; font-size:15px; padding:10px 12px; border:1px solid var(--line);
@@ -370,12 +370,12 @@ main{flex:1; padding:24px 20px 60px;}
 .account-form input:focus-visible{ outline:2px solid var(--frost); outline-offset:1px; }
 .account-btn{
   border:none; background:var(--frost); color:var(--paper); border-radius:999px;
-  padding:11px 20px; font-weight:700; font-size:14px; cursor:pointer; min-height:44px;
+  padding:11px 20px; font-weight:500; font-size:14px; cursor:pointer; min-height:44px;
 }
 .account-btn:disabled{ opacity:.6; cursor:default; }
 .account-switch{
   display:block; margin-top:14px; background:none; border:none; color:var(--frost);
-  font-size:13px; font-weight:700; cursor:pointer; text-decoration:underline; min-height:auto; padding:0;
+  font-size:13px; font-weight:500; cursor:pointer; text-decoration:underline; min-height:auto; padding:0;
 }
 .account-status{ font-size:13px; padding:10px 12px; border-radius:10px; }
 .account-status.error{ background:#F7DEDE; color:#A6403D; }
