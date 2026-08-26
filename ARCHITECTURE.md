@@ -348,7 +348,59 @@ If you add a new interactive-only control to `ChatPanel.jsx` later
 `{!isExporting && (...)}` — otherwise it'll show up uselessly in the
 downloaded PDF.
 
-## 7. Things Not To Do
+## 7. How ID-Only Login Works
+
+Logging in used to mean typing an email and a password. Now a student just
+types one ID (e.g. `nagham`) and hits Continue — no password field exists
+anywhere in the UI. This was a deliberate, explicit product decision, not an
+oversight, and it comes with a real, accepted tradeoff: **anyone who knows
+or guesses another student's ID can log in as them and see or delete their
+saved flashcards.** That's fine for a low-stakes classroom setting, which is
+the only setting this app is meant for — don't "fix" it by adding a
+password back in.
+
+**Why this still uses Supabase Auth under the hood.** Every flashcard is
+protected by a Row Level Security policy keyed on `auth.uid() = user_id` —
+that's the entire reason one student can't see another's flashcards in the
+database. Supabase Auth is what hands out that `auth.uid()`, and it always
+wants an email + password pair, even though neither is ever shown to a
+student. So `src/auth.js` fakes both:
+
+- `idToEmail(id)` turns the typed ID into a fake address like
+  `nagham@id.rustalk.local` — never a real inbox, never emailed to anyone.
+- Every account, for every student, is created and signed in with the exact
+  same fixed password (a constant in `src/auth.js`). It's effectively public
+  (like the anon key already committed in `supabaseClient.js`) — the ID is
+  the only thing standing between a student's account and anyone else, by
+  design.
+
+**`signInWithId(id)`** (`src/auth.js`) is the single entry point for both
+logging in and signing up, because from a student's point of view there's
+no difference: they just type their ID.
+1. It first tries to log in with that ID's fake email + the shared password.
+2. If no account exists yet, it signs one up instead — the first person to
+   type a given ID is the one who claims it. From then on, typing that same
+   ID again always logs into that same account.
+
+**Required one-time Supabase setting.** The fake email addresses this
+relies on can never receive a confirmation link, so the project's
+Authentication → Providers → Email → "Confirm email" setting must be
+switched **off** in the Supabase dashboard. This can't be done from the
+app's code — it's a project setting. If it's still on, `signInWithId` will
+detect that sign-up succeeded but no session came back, and surfaces a
+message telling whoever runs the site to turn it off, instead of leaving
+the student stuck with no explanation. (This also means the earlier
+"confirmation email" behavior from when accounts used real email addresses
+no longer applies — there is no real email to confirm anymore.)
+
+- **Don't reintroduce a password field.** The user explicitly chose
+  "ID alone, no password" after being shown the tradeoff above.
+- **Don't validate ID uniqueness with a separate check.** Supabase's own
+  email-uniqueness constraint on the derived fake email already does this —
+  the first sign-up for a given ID succeeds and claims it; that's the
+  intended mechanism, not a gap to close.
+
+## 8. Things Not To Do
 
 - **Saved words are tracked globally by word text — one word equals
   one flashcard, no matter how many topics or conversations it appears
