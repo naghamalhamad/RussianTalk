@@ -48,6 +48,12 @@ jobs.
   speak text calls the `speak()` function here — nothing else should
   talk to the browser's narrator directly.
 
+- **`src/pdfExport.js`** — The one shared "turn part of the page into
+  a downloaded PDF" helper (`exportElementAsPDF(element, filename)`).
+  Unlike `speech.js`, this one does need two small outside libraries
+  (`jspdf`, `html2canvas`) since browsers don't offer a built-in way
+  to save a file directly — see "How Exporting a Dialog Works" below.
+
 - **`src/styles.css`** — The one shared paint-and-furniture catalog.
   All the colors, fonts, and spacing used anywhere in the app are
   defined once at the top (as named "tokens," like "amber" or
@@ -83,8 +89,9 @@ jobs.
   by hand.
 
 - **`package.json`** — The shopping list of outside tools the app
-  needs to run (currently just React itself and the build tool, Vite —
-  nothing extra).
+  needs to run: React itself, the build tool (Vite), the Supabase
+  client, and the two small libraries behind PDF export (`jspdf`,
+  `html2canvas`).
 
 - **`vite.config.js`** — Settings for the tool that packages the app
   up for the web. Rarely needs touching.
@@ -274,30 +281,42 @@ doesn't affect word flashcards at all.
 
 ## 6. How Exporting a Dialog Works
 
-The "🖨️ Export dialog" button next to "Listen to full dialog" in
-`ChatPanel.jsx` just calls the browser's own built-in `window.print()`
-— no PDF library, no backend, matching the app's "reuse what the
-browser already gives you" approach (same reasoning as the audio
-feature using the browser's built-in narrator instead of a library).
-The student picks "Save as PDF" in their browser's print dialog if
-they want a file, or prints it for real.
+The "⬇️ Download PDF" button next to "Listen to full dialog" in
+`ChatPanel.jsx` downloads a real PDF file directly — no print dialog,
+no "Save as PDF" step for the student to find. Browsers don't give a
+web page any way to save a file without going through the print
+dialog on their own, so this needed two small libraries:
+`html2canvas` (takes a snapshot of the conversation exactly as
+styled) and `jsPDF` (turns that snapshot into a downloadable file,
+split across as many A4 pages as it needs). The shared logic lives in
+`src/pdfExport.js`, in one function, `exportElementAsPDF(element,
+filename)` — give it any DOM element and a filename and it handles
+the rest.
 
-What makes the exported page look right lives entirely in one
-`@media print` block at the bottom of `src/styles.css`: it hides
-everything that isn't the conversation itself (the top bar, the
-dialog sidebar, the tabs, the "Listen"/"Export" buttons, word and
-sentence save icons, the hint text) and forces every English
-translation line to always show — normally `.translation-line` is
-hidden until you hover or tap a bubble, but a printed page can't be
-hovered, so print mode ignores that and shows it unconditionally.
-Everything else (the chat bubble colors, fonts, layout) is untouched,
-so the exported page looks like the same conversation, just with
-every translation visible at once and the app's controls stripped
-away.
+Those two libraries are fairly large, so `ChatPanel.jsx` only fetches
+them the moment someone actually clicks the button (`await
+import('../pdfExport.js')`), instead of loading them for every
+visitor up front. This is the same "only pay for what you use"
+thinking as the rest of the app, just applied to code size instead of
+network calls.
+
+Right before snapshotting, `ChatPanel.jsx` sets a local `isExporting`
+flag that does two things while it's true: it hides everything that
+isn't the conversation itself (the "Listen"/"Download" buttons, word
+and sentence save icons, the hint text), and it forces every English
+translation line to show — normally `.translation-line` only shows
+on hover or tap, which doesn't mean anything for a still snapshot, so
+export mode shows it unconditionally. Nothing is actually removed
+from the dialog; the controls just reappear the moment the download
+finishes. Everything else (the chat bubble colors, fonts, layout) is
+untouched, so the exported page looks like the same conversation,
+just with every translation visible at once and the app's controls
+stripped away.
 
 If you add a new interactive-only control to `ChatPanel.jsx` later
-(another button, another icon), add it to that same `@media print`
-hide-list — otherwise it'll show up uselessly on the exported page.
+(another button, another icon), hide it the same way — wrap it in
+`{!isExporting && (...)}` — otherwise it'll show up uselessly in the
+downloaded PDF.
 
 ## 7. Things Not To Do
 

@@ -391,20 +391,3 @@ main{flex:1; padding:24px;}
   background:var(--paper); border:1px solid var(--line); border-radius:var(--radius);
   padding:18px; max-width:360px; margin-top:16px; display:flex; flex-direction:column; gap:14px;
 }
-
-/* ===== Exporting a dialog (window.print, no library) =====
-   Hides everything except the conversation itself, and forces every
-   English translation line to show (normally it's hidden until hover
-   or tap), so the exported page reads as Russian + English together. */
-@media print{
-  .topbar, .back-row, .topic-tabs, .dialog-menu, .hint-row,
-  .dialog-header-actions, .sentence-save-btn, .speaker-btn, .popover{
-    display:none !important;
-  }
-  body{ background:#fff; }
-  main{ padding:0; }
-  .topic-layout{ display:block; }
-  .chat-panel{ border:none; box-shadow:none; padding:0; min-height:0; }
-  .bubble-row{ break-inside:avoid; page-break-inside:avoid; }
-  .translation-line{ display:block !important; }
-}

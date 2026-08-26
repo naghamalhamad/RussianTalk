@@ -49,6 +49,7 @@ export default function ChatPanel({ dialogId, flashcards, loggedIn, onSaveCard, 
   const [popover, setPopover] = useState(null);
   const [playingAll, setPlayingAll] = useState(false);
   const [activeLine, setActiveLine] = useState(null);
+  const [isExporting, setIsExporting] = useState(false);
   const panelRef = useRef(null);
   const closeTimerRef = useRef(null);
   const stopSequenceRef = useRef(null);
@@ -147,6 +148,24 @@ export default function ChatPanel({ dialogId, flashcards, loggedIn, onSaveCard, 
 
   const alreadySaved = popover ? savedWords.has(popover.word) : false;
 
+  // Hides the app's own controls and forces every translation to show, then
+  // snapshots the conversation and turns it into a downloaded PDF - see
+  // src/pdfExport.js. The brief moment those controls disappear is just the
+  // export in progress; nothing is actually removed from the dialog.
+  // The PDF libraries are fairly large, so they're only fetched here, on
+  // first use, instead of loading them for every visitor up front.
+  async function handleExport() {
+    setIsExporting(true);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    try {
+      const { exportElementAsPDF } = await import('../pdfExport.js');
+      const filename = d.title.replace(/[^a-zA-Z0-9\- ]+/g, '').trim() || 'dialog';
+      await exportElementAsPDF(panelRef.current, filename);
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
   return (
     <div className="chat-panel" ref={panelRef} style={{ position: 'relative' }}>
       <div className="dialog-header">
@@ -154,16 +173,18 @@ export default function ChatPanel({ dialogId, flashcards, loggedIn, onSaveCard, 
           <h3 className="dialog-heading">{d.title}</h3>
           <p className="dialog-sub">{d.sub}</p>
         </div>
-        <div className="dialog-header-actions">
-          {isSpeechSupported() && (
-            <button className={`play-all-btn ${playingAll ? 'playing' : ''}`} onClick={toggleDialogPlayback}>
-              {playingAll ? '⏸ Stop' : '🔊 Listen to full dialog'}
+        {!isExporting && (
+          <div className="dialog-header-actions">
+            {isSpeechSupported() && (
+              <button className={`play-all-btn ${playingAll ? 'playing' : ''}`} onClick={toggleDialogPlayback}>
+                {playingAll ? '⏸ Stop' : '🔊 Listen to full dialog'}
+              </button>
+            )}
+            <button className="export-btn" onClick={handleExport}>
+              ⬇️ Download PDF
             </button>
-          )}
-          <button className="export-btn" onClick={() => window.print()}>
-            🖨️ Export dialog
-          </button>
-        </div>
+          </div>
+        )}
       </div>
 
       {d.lines.map((line, li) => (
@@ -171,23 +192,27 @@ export default function ChatPanel({ dialogId, flashcards, loggedIn, onSaveCard, 
           <div className="bubble-wrap">
             <div className="speaker-tag">
               {line.speaker}
-              <SpeakerButton text={line.ru} label="Play sentence" />
-              <button
-                type="button"
-                className={`sentence-save-btn ${savedSentences.has(line.ru) ? 'saved' : ''}`}
-                title={savedSentences.has(line.ru) ? 'Remove sentence flashcard' : 'Save whole sentence as flashcard'}
-                onClick={() => {
-                  if (!loggedIn) {
-                    onRequireLogin();
-                  } else if (savedSentences.has(line.ru)) {
-                    onRemoveCard(line.ru, 'sentence');
-                  } else {
-                    onSaveCard({ word: line.ru, tr: line.tr, dialogId, topicId: d.topicId, type: 'sentence' });
-                  }
-                }}
-              >
-                🔖
-              </button>
+              {!isExporting && (
+                <>
+                  <SpeakerButton text={line.ru} label="Play sentence" />
+                  <button
+                    type="button"
+                    className={`sentence-save-btn ${savedSentences.has(line.ru) ? 'saved' : ''}`}
+                    title={savedSentences.has(line.ru) ? 'Remove sentence flashcard' : 'Save whole sentence as flashcard'}
+                    onClick={() => {
+                      if (!loggedIn) {
+                        onRequireLogin();
+                      } else if (savedSentences.has(line.ru)) {
+                        onRemoveCard(line.ru, 'sentence');
+                      } else {
+                        onSaveCard({ word: line.ru, tr: line.tr, dialogId, topicId: d.topicId, type: 'sentence' });
+                      }
+                    }}
+                  >
+                    🔖
+                  </button>
+                </>
+              )}
             </div>
             <div
               className="bubble"
@@ -210,12 +235,14 @@ export default function ChatPanel({ dialogId, flashcards, loggedIn, onSaveCard, 
               />
             </div>
             {line.translit && <div className="translit">{line.translit}</div>}
-            <div className={`translation-line ${shownLines.has(li) || hoveredLine === li ? 'shown' : ''}`}>{line.tr}</div>
+            <div className={`translation-line ${shownLines.has(li) || hoveredLine === li || isExporting ? 'shown' : ''}`}>{line.tr}</div>
           </div>
         </div>
       ))}
 
-      <div className="hint-row">Hover or tap a bubble to translate the sentence · hover or tap a word to hear, translate &amp; save it</div>
+      {!isExporting && (
+        <div className="hint-row">Hover or tap a bubble to translate the sentence · hover or tap a word to hear, translate &amp; save it</div>
+      )}
 
       {popover && (
         <div
