@@ -51,6 +51,7 @@ export default function ChatPanel({ dialogId, flashcards, loggedIn, onSaveCard, 
   const [activeLine, setActiveLine] = useState(null);
   const [isExporting, setIsExporting] = useState(false);
   const panelRef = useRef(null);
+  const linesRef = useRef(null);
   const closeTimerRef = useRef(null);
   const stopSequenceRef = useRef(null);
 
@@ -149,8 +150,9 @@ export default function ChatPanel({ dialogId, flashcards, loggedIn, onSaveCard, 
   const alreadySaved = popover ? savedWords.has(popover.word) : false;
 
   // Hides the app's own controls and forces every translation to show, then
-  // snapshots the conversation and turns it into a downloaded PDF - see
-  // src/pdfExport.js. The brief moment those controls disappear is just the
+  // snapshots just the conversation lines (not the title/sub - the PDF draws
+  // its own branded header for that, see src/pdfExport.js) and turns it into
+  // a downloaded PDF. The brief moment those controls disappear is just the
   // export in progress; nothing is actually removed from the dialog.
   // The PDF libraries are fairly large, so they're only fetched here, on
   // first use, instead of loading them for every visitor up front.
@@ -160,7 +162,7 @@ export default function ChatPanel({ dialogId, flashcards, loggedIn, onSaveCard, 
     try {
       const { exportElementAsPDF } = await import('../pdfExport.js');
       const filename = d.title.replace(/[^a-zA-Z0-9\- ]+/g, '').trim() || 'dialog';
-      await exportElementAsPDF(panelRef.current, filename);
+      await exportElementAsPDF(linesRef.current, filename, { title: d.title, subtitle: d.sub });
     } finally {
       setIsExporting(false);
     }
@@ -187,58 +189,60 @@ export default function ChatPanel({ dialogId, flashcards, loggedIn, onSaveCard, 
         )}
       </div>
 
-      {d.lines.map((line, li) => (
-        <div className={`bubble-row ${line.side} ${activeLine === li ? 'reading' : ''}`} key={li}>
-          <div className="bubble-wrap">
-            <div className="speaker-tag">
-              {line.speaker}
-              {!isExporting && (
-                <>
-                  <SpeakerButton text={line.ru} label="Play sentence" />
-                  <button
-                    type="button"
-                    className={`sentence-save-btn ${savedSentences.has(line.ru) ? 'saved' : ''}`}
-                    title={savedSentences.has(line.ru) ? 'Remove sentence flashcard' : 'Save whole sentence as flashcard'}
-                    onClick={() => {
-                      if (!loggedIn) {
-                        onRequireLogin();
-                      } else if (savedSentences.has(line.ru)) {
-                        onRemoveCard(line.ru, 'sentence');
-                      } else {
-                        onSaveCard({ word: line.ru, tr: line.tr, dialogId, topicId: d.topicId, type: 'sentence' });
-                      }
-                    }}
-                  >
-                    🔖
-                  </button>
-                </>
-              )}
+      <div ref={linesRef}>
+        {d.lines.map((line, li) => (
+          <div className={`bubble-row ${line.side} ${activeLine === li ? 'reading' : ''}`} key={li}>
+            <div className="bubble-wrap">
+              <div className="speaker-tag">
+                {line.speaker}
+                {!isExporting && (
+                  <>
+                    <SpeakerButton text={line.ru} label="Play sentence" />
+                    <button
+                      type="button"
+                      className={`sentence-save-btn ${savedSentences.has(line.ru) ? 'saved' : ''}`}
+                      title={savedSentences.has(line.ru) ? 'Remove sentence flashcard' : 'Save whole sentence as flashcard'}
+                      onClick={() => {
+                        if (!loggedIn) {
+                          onRequireLogin();
+                        } else if (savedSentences.has(line.ru)) {
+                          onRemoveCard(line.ru, 'sentence');
+                        } else {
+                          onSaveCard({ word: line.ru, tr: line.tr, dialogId, topicId: d.topicId, type: 'sentence' });
+                        }
+                      }}
+                    >
+                      🔖
+                    </button>
+                  </>
+                )}
+              </div>
+              <div
+                className="bubble"
+                onClick={() => toggleTranslation(li)}
+                onMouseEnter={() => {
+                  setHoveredLine(li);
+                  cancelPopoverClose();
+                }}
+                onMouseLeave={() => {
+                  setHoveredLine(null);
+                  schedulePopoverClose();
+                }}
+              >
+                <BubbleWords
+                  line={line}
+                  dialogId={dialogId}
+                  topicId={d.topicId}
+                  savedWords={savedWords}
+                  onWordClick={onWordClick}
+                />
+              </div>
+              {line.translit && <div className="translit">{line.translit}</div>}
+              <div className={`translation-line ${shownLines.has(li) || hoveredLine === li || isExporting ? 'shown' : ''}`}>{line.tr}</div>
             </div>
-            <div
-              className="bubble"
-              onClick={() => toggleTranslation(li)}
-              onMouseEnter={() => {
-                setHoveredLine(li);
-                cancelPopoverClose();
-              }}
-              onMouseLeave={() => {
-                setHoveredLine(null);
-                schedulePopoverClose();
-              }}
-            >
-              <BubbleWords
-                line={line}
-                dialogId={dialogId}
-                topicId={d.topicId}
-                savedWords={savedWords}
-                onWordClick={onWordClick}
-              />
-            </div>
-            {line.translit && <div className="translit">{line.translit}</div>}
-            <div className={`translation-line ${shownLines.has(li) || hoveredLine === li || isExporting ? 'shown' : ''}`}>{line.tr}</div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
       {!isExporting && (
         <div className="hint-row">Hover or tap a bubble to translate the sentence · hover or tap a word to hear, translate &amp; save it</div>
