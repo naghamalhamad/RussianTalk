@@ -272,7 +272,34 @@ it; trying to save one before the column exists just fails quietly
 (the same as any other database hiccup this app already handles) and
 doesn't affect word flashcards at all.
 
-## 6. Things Not To Do
+## 6. How Exporting a Dialog Works
+
+The "🖨️ Export dialog" button next to "Listen to full dialog" in
+`ChatPanel.jsx` just calls the browser's own built-in `window.print()`
+— no PDF library, no backend, matching the app's "reuse what the
+browser already gives you" approach (same reasoning as the audio
+feature using the browser's built-in narrator instead of a library).
+The student picks "Save as PDF" in their browser's print dialog if
+they want a file, or prints it for real.
+
+What makes the exported page look right lives entirely in one
+`@media print` block at the bottom of `src/styles.css`: it hides
+everything that isn't the conversation itself (the top bar, the
+dialog sidebar, the tabs, the "Listen"/"Export" buttons, word and
+sentence save icons, the hint text) and forces every English
+translation line to always show — normally `.translation-line` is
+hidden until you hover or tap a bubble, but a printed page can't be
+hovered, so print mode ignores that and shows it unconditionally.
+Everything else (the chat bubble colors, fonts, layout) is untouched,
+so the exported page looks like the same conversation, just with
+every translation visible at once and the app's controls stripped
+away.
+
+If you add a new interactive-only control to `ChatPanel.jsx` later
+(another button, another icon), add it to that same `@media print`
+hide-list — otherwise it'll show up uselessly on the exported page.
+
+## 7. Things Not To Do
 
 - **Saved words are tracked globally by word text — one word equals
   one flashcard, no matter how many topics or conversations it appears

@@ -154,11 +154,16 @@ export default function ChatPanel({ dialogId, flashcards, loggedIn, onSaveCard, 
           <h3 className="dialog-heading">{d.title}</h3>
           <p className="dialog-sub">{d.sub}</p>
         </div>
-        {isSpeechSupported() && (
-          <button className={`play-all-btn ${playingAll ? 'playing' : ''}`} onClick={toggleDialogPlayback}>
-            {playingAll ? '⏸ Stop' : '🔊 Listen to full dialog'}
+        <div className="dialog-header-actions">
+          {isSpeechSupported() && (
+            <button className={`play-all-btn ${playingAll ? 'playing' : ''}`} onClick={toggleDialogPlayback}>
+              {playingAll ? '⏸ Stop' : '🔊 Listen to full dialog'}
+            </button>
+          )}
+          <button className="export-btn" onClick={() => window.print()}>
+            🖨️ Export dialog
           </button>
-        )}
+        </div>
       </div>
 
       {d.lines.map((line, li) => (
