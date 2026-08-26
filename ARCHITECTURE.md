@@ -300,15 +300,22 @@ still used for other things). That's because the PDF draws its own
 branded header instead of reusing the on-screen title — see below.
 
 **The PDF has a real header and footer, drawn directly by `jsPDF`
-(not part of the screenshot)**, repeated identically on every page:
-a small amber "RusTalk" mark and tagline, the dialog's title and
-subtitle, a divider line, then the conversation; and at the bottom, a
-divider, "RusTalk," and "Page X of Y." Everything is drawn with
-`jsPDF`'s own text/shape calls in `src/pdfExport.js`'s
-`drawHeader`/`drawFooter` helpers, using the same named colors as
-`src/styles.css` (amber, ink, ink-soft, line) so it matches the app's
-look without picking new colors. A `margin` (40pt) keeps the header,
-footer, and every page of content off the paper's edge.
+(not part of the screenshot).** The header — a small amber "RusTalk"
+mark and tagline, the dialog's title and subtitle, a divider line —
+only appears on **page 1**, like a document cover, not repeated on
+every page. The footer (a divider, "RusTalk," and "Page X of Y") does
+repeat on every page. Everything is drawn with `jsPDF`'s own
+text/shape calls in `src/pdfExport.js`'s `drawHeader`/`drawFooter`
+helpers, using the same named colors as `src/styles.css` (amber, ink,
+ink-soft, line) so it matches the app's look without picking new
+colors. A `margin` (40pt) keeps the header, footer, and every page of
+content off the paper's edge.
+
+Because only page 1 reserves space for the header, **page 1 fits less
+conversation content than later pages do** — `exportElementAsPDF`
+tracks two different content-area heights (`firstSlicePx` vs.
+`laterSlicePx`) and picks the right one per page instead of assuming
+every page has the same amount of room.
 
 **Why each page gets its own cropped slice of the screenshot,
 instead of one giant image redrawn on every page**: pasting the same
@@ -317,11 +324,13 @@ it only works if nothing else needs to live below that image — but
 the footer does. So each page instead gets a freshly cropped,
 correctly-sized slice of the original canvas (via an offscreen `<canvas>` and
 `drawImage` with a source rectangle), sized to fit exactly between the
-header and footer. This was a real bug the first time this was
-built: the footer's reserved space and the image's actual boundary
-didn't agree, so page content visibly overlapped the footer text. If
-you touch the pagination math again, keep the slice-per-page approach
-- don't go back to one full-height image with page-edge clipping.
+(page-specific) content top and the footer. This was a real bug the
+first time this was built: the footer's reserved space and the
+image's actual boundary didn't agree, so page content visibly
+overlapped the footer text. If you touch the pagination math again,
+keep the slice-per-page approach - don't go back to one full-height
+image with page-edge clipping, and keep accounting for page 1 having
+less room than the rest.
 
 Those two libraries are fairly large, so `ChatPanel.jsx` only fetches
 them the moment someone actually clicks the button (`await

@@ -63,8 +63,9 @@ function drawFooter(pdf, { margin, pageWidth, contentBottom, pageNum, totalPages
 // The one shared place that turns a piece of the page into a downloaded PDF.
 // Takes a snapshot of the element exactly as it's styled (same fonts, same
 // colors, same layout), then slices that snapshot across as many A4 pages as
-// it needs, each with a matching header/footer and a margin around the
-// content - no browser print dialog involved.
+// it needs - no browser print dialog involved. The branded header (title,
+// subtitle, RusTalk mark) only appears on page 1, like a document cover, not
+// repeated on every page; the footer still repeats on every page.
 export async function exportElementAsPDF(element, filename, { title = '', subtitle = '' } = {}) {
   const canvas = await html2canvas(element, { scale: 2, backgroundColor: '#ffffff' });
 
@@ -72,30 +73,41 @@ export async function exportElementAsPDF(element, filename, { title = '', subtit
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
   const margin = 40;
-  const headerHeight = 84; // space below the top margin reserved for the header block
+  const headerHeight = 84; // space below the top margin reserved for the header block (page 1 only)
   const footerHeight = 28; // space above the bottom margin reserved for the footer block
-  const contentTop = margin + headerHeight;
-  const contentBottom = pageHeight - margin - footerHeight;
   const contentWidth = pageWidth - margin * 2;
-  const contentHeight = contentBottom - contentTop;
+  const contentBottom = pageHeight - margin - footerHeight;
+  const firstContentTop = margin + headerHeight;
+  const laterContentTop = margin;
 
   // How many source-canvas pixels fit in one page's worth of content height.
   // Each page gets its own cropped slice of the canvas (rather than drawing
   // the full image on every page and hoping the page edge clips it) so the
-  // content can never paint over the header or footer.
+  // content can never paint over the header or footer. Page 1 has less room
+  // than later pages since it alone reserves space for the header.
   const pxPerPt = canvas.width / contentWidth;
-  const pageSlicePx = Math.floor(contentHeight * pxPerPt);
-  const totalPages = Math.max(1, Math.ceil(canvas.height / pageSlicePx));
+  const firstSlicePx = Math.floor((contentBottom - firstContentTop) * pxPerPt);
+  const laterSlicePx = Math.floor((contentBottom - laterContentTop) * pxPerPt);
+
+  let totalPages = 1;
+  let remainingPx = canvas.height - firstSlicePx;
+  while (remainingPx > 0) {
+    totalPages++;
+    remainingPx -= laterSlicePx;
+  }
 
   const sliceCanvas = document.createElement('canvas');
   sliceCanvas.width = canvas.width;
   const sliceCtx = sliceCanvas.getContext('2d');
 
+  let srcY = 0;
   for (let page = 0; page < totalPages; page++) {
     if (page > 0) pdf.addPage();
-    drawHeader(pdf, { margin, pageWidth, title, subtitle });
+    const isFirst = page === 0;
+    if (isFirst) drawHeader(pdf, { margin, pageWidth, title, subtitle });
 
-    const srcY = page * pageSlicePx;
+    const contentTop = isFirst ? firstContentTop : laterContentTop;
+    const pageSlicePx = isFirst ? firstSlicePx : laterSlicePx;
     const srcHeight = Math.min(pageSlicePx, canvas.height - srcY);
     sliceCanvas.height = srcHeight;
     sliceCtx.fillStyle = '#ffffff';
@@ -109,6 +121,7 @@ export async function exportElementAsPDF(element, filename, { title = '', subtit
     pdf.addImage(sliceData, 'JPEG', margin, contentTop, contentWidth, sliceHeightPt);
 
     drawFooter(pdf, { margin, pageWidth, contentBottom, pageNum: page + 1, totalPages });
+    srcY += srcHeight;
   }
 
   pdf.save(`${filename}.pdf`);
