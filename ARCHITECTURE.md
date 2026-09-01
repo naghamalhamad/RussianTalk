@@ -196,6 +196,30 @@ reads as separate beats instead of one run-on stream. Both constants
 live at the top of `speech.js` — change them there, not per-call, so
 every use of audio in the app stays in sync.
 
+**Differentiating the two roles by voice**: every dialog line has a
+`side` (`'left'` for the other person — waiter, cashier, staff,
+friend...; `'right'` for "You," the learner's own line). `speech.js`
+uses this to try to give the `'left'` role a distinct, male-sounding
+voice — `findMaleVoice()` matches the visitor's own installed Russian
+voices by name (there's no gender field on a Web Speech voice, so this
+is a best-effort name match, e.g. "Pavel," "Dmitri"). `'right'` lines,
+and anything with no side at all (a saved flashcard, which has no
+"other role"), always keep the browser's own default voice —
+unchanged from before. `speak()` and `speakSequence()` both take a
+`side`, and `SpeakerButton` forwards a `side` prop the same way it
+already forwards `text`/`label`.
+
+**Another honest limitation, same as above**: whether a *different*
+Russian voice is actually available at all depends on the visitor's
+own device — many devices (this sandbox included) ship with exactly
+one Russian voice, in which case both roles keep sounding the same,
+same as before this feature existed. This isn't a bug to chase; there
+is nothing this app can install on someone else's device. If you
+touch `MALE_VOICE_NAME_HINTS` in `speech.js`, keep in mind it's a
+plain substring match against whatever the OS/browser happens to name
+its voices — there's no reliable "ask the browser for a male voice"
+API to use instead.
+
 **How the training quiz's audio button avoids flipping the card**:
 the "Train All" quiz (`TrainingModal.jsx`) shows one flip-able card at
 a time — tapping it anywhere flips it from the Russian word to the

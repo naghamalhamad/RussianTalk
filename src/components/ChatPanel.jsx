@@ -31,8 +31,8 @@ function BubbleWords({ line, dialogId, topicId, savedWords, onWordClick }) {
       <span
         key={i}
         className={`word ${savedWords.has(seg.text) ? 'saved' : ''}`}
-        onClick={(e) => onWordClick(e, seg.text, seg.tr, dialogId, topicId)}
-        onMouseEnter={(e) => onWordClick(e, seg.text, seg.tr, dialogId, topicId)}
+        onClick={(e) => onWordClick(e, seg.text, seg.tr, dialogId, topicId, line.side)}
+        onMouseEnter={(e) => onWordClick(e, seg.text, seg.tr, dialogId, topicId, line.side)}
       >
         {seg.text}
       </span>
@@ -109,7 +109,7 @@ export default function ChatPanel({ dialogId, flashcards, loggedIn, onSaveCard, 
     });
   }
 
-  function onWordClick(e, word, tr, dlgId, topicId) {
+  function onWordClick(e, word, tr, dlgId, topicId, side) {
     e.stopPropagation();
     cancelPopoverClose();
     const rect = e.currentTarget.getBoundingClientRect();
@@ -119,6 +119,7 @@ export default function ChatPanel({ dialogId, flashcards, loggedIn, onSaveCard, 
       tr,
       dialogId: dlgId,
       topicId,
+      side,
       top: rect.bottom - panelRect.top + panelRef.current.scrollTop + 8,
       left: rect.left - panelRect.left,
     });
@@ -135,7 +136,7 @@ export default function ChatPanel({ dialogId, flashcards, loggedIn, onSaveCard, 
     setPopover(null);
     setPlayingAll(true);
     stopSequenceRef.current = speakSequence(
-      d.lines.map((line) => line.ru),
+      d.lines.map((line) => ({ text: line.ru, side: line.side })),
       {
         onStepStart: (i) => setActiveLine(i),
         onDone: () => {
@@ -197,7 +198,7 @@ export default function ChatPanel({ dialogId, flashcards, loggedIn, onSaveCard, 
                 {line.speaker}
                 {!isExporting && (
                   <>
-                    <SpeakerButton text={line.ru} label="Play sentence" />
+                    <SpeakerButton text={line.ru} label="Play sentence" side={line.side} />
                     <button
                       type="button"
                       className={`sentence-save-btn ${savedSentences.has(line.ru) ? 'saved' : ''}`}
@@ -257,7 +258,7 @@ export default function ChatPanel({ dialogId, flashcards, loggedIn, onSaveCard, 
         >
           <div className="tr">
             {popover.word} — {popover.tr}
-            <SpeakerButton text={popover.word} label={`Play "${popover.word}"`} />
+            <SpeakerButton text={popover.word} label={`Play "${popover.word}"`} side={popover.side} />
           </div>
           <button
             className={alreadySaved ? 'saved-btn' : ''}

@@ -1,6 +1,6 @@
 import { speak, isSpeechSupported } from '../speech.js';
 
-export default function SpeakerButton({ text, label, className = '' }) {
+export default function SpeakerButton({ text, label, className = '', side }) {
   if (!isSpeechSupported()) return null;
   return (
     <button
@@ -10,7 +10,7 @@ export default function SpeakerButton({ text, label, className = '' }) {
       aria-label={label}
       onClick={(e) => {
         e.stopPropagation();
-        speak(text);
+        speak(text, { side });
       }}
     >
       🔊
