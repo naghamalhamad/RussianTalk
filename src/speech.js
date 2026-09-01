@@ -1,5 +1,11 @@
 let activeSequenceStop = null;
 
+// Slower than the browser's default (1) so words are easier to catch while
+// learning; and a short silent gap between sentences in a full-dialog
+// playback, so one sentence doesn't run straight into the next.
+const SPEECH_RATE = 0.8;
+const PAUSE_BETWEEN_SENTENCES_MS = 700;
+
 export function isSpeechSupported() {
   return typeof window !== 'undefined' && 'speechSynthesis' in window;
 }
@@ -18,6 +24,7 @@ export function speak(text, lang = 'ru-RU') {
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = lang;
+  utterance.rate = SPEECH_RATE;
   window.speechSynthesis.speak(utterance);
 }
 
@@ -42,10 +49,12 @@ export function speakSequence(texts, { lang = 'ru-RU', onStepStart, onDone } = {
 
   let finished = false;
   let index = 0;
+  let pauseTimer = null;
 
   function finish() {
     if (finished) return;
     finished = true;
+    if (pauseTimer) clearTimeout(pauseTimer);
     if (activeSequenceStop === stop) activeSequenceStop = null;
     onDone?.();
   }
@@ -60,10 +69,16 @@ export function speakSequence(texts, { lang = 'ru-RU', onStepStart, onDone } = {
     onStepStart?.(i);
     const utterance = new SpeechSynthesisUtterance(texts[i]);
     utterance.lang = lang;
+    utterance.rate = SPEECH_RATE;
     utterance.onend = () => {
       if (finished) return;
       index += 1;
-      playNext();
+      // A brief silent gap before the next sentence, instead of running
+      // straight into it, so each one reads as a separate beat.
+      pauseTimer = setTimeout(() => {
+        pauseTimer = null;
+        playNext();
+      }, PAUSE_BETWEEN_SENTENCES_MS);
     };
     utterance.onerror = () => finish();
     window.speechSynthesis.speak(utterance);

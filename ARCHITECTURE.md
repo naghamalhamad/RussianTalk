@@ -186,6 +186,16 @@ side.
 If you add more places that need to read text aloud, always reuse
 `SpeakerButton` and `speak()` — don't write a second version of this.
 
+**Speed and pacing**: every utterance (single word, single sentence,
+or a "Listen to full dialog" sequence) plays at a fixed `rate: 0.8` —
+slower than the browser's default of 1 — since this is for learners,
+not native-speed listening. `speakSequence` in `src/speech.js` also
+waits `PAUSE_BETWEEN_SENTENCES_MS` (700ms) of silence after each
+sentence finishes before starting the next one, so a full dialog
+reads as separate beats instead of one run-on stream. Both constants
+live at the top of `speech.js` — change them there, not per-call, so
+every use of audio in the app stays in sync.
+
 **How the training quiz's audio button avoids flipping the card**:
 the "Train All" quiz (`TrainingModal.jsx`) shows one flip-able card at
 a time — tapping it anywhere flips it from the Russian word to the
