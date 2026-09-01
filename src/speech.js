@@ -16,9 +16,9 @@ const PAUSE_BETWEEN_SENTENCES_MS = 700;
 // test showed no audible difference), so rate carries the difference on
 // its own if pitch doesn't take effect, instead of the feature silently
 // doing nothing again.
-const LEFT_ROLE_PITCH = 0.55;
+const LEFT_ROLE_PITCH = 0.4;
 const DEFAULT_PITCH = 1;
-const LEFT_ROLE_RATE = 0.68;
+const LEFT_ROLE_RATE = 0.62;
 
 export function isSpeechSupported() {
   return typeof window !== 'undefined' && 'speechSynthesis' in window;
@@ -41,24 +41,29 @@ if (isSpeechSupported()) {
   });
 }
 
-// The Web Speech API doesn't expose a voice's gender, so picking a "male"
-// voice is a best-effort name match against whatever voices the visitor's
-// own device happens to have installed. In practice this rarely finds
-// anything - most devices (phones especially) ship exactly one Russian
-// voice, so there's no second voice to switch to no matter how good the
-// name match is. That's why LEFT_ROLE_PITCH above, not this, is what
-// actually guarantees the two roles sound different; this is just a nice
-// bonus on the minority of devices that do have more than one.
+// The Web Speech API doesn't expose a voice's gender, so a name match
+// (e.g. "Pavel," "Dmitri") is tried first for an obviously male-sounding
+// voice. But most real devices that DO have a second Russian voice give
+// it a generic name with no gender hint at all (e.g. two voices both just
+// called "Google русский" or numbered "Russian 1"/"Russian 2") - a name
+// match alone missed those and left both roles on the same voice, which a
+// live check confirmed sounds identical. So if no name matches, this
+// falls back to simply using any other installed Russian voice, gender
+// hint or not - a genuinely different voice model always sounds
+// meaningfully different, which beats pitch/rate tweaks on the same voice.
 const MALE_VOICE_NAME_HINTS = [
   'male', 'yuri', 'yury', 'pavel', 'dmitri', 'dmitry', 'ivan', 'sergei', 'sergey',
   'boris', 'nikolai', 'mikhail', 'aleksei', 'alexei', 'maxim',
 ];
 
-function findMaleVoice(lang) {
+function findAlternateVoice(lang) {
   const langPrefix = lang.slice(0, 2).toLowerCase();
   const voices = loadVoices().filter((v) => v.lang?.toLowerCase().startsWith(langPrefix));
   if (voices.length < 2) return undefined; // nothing to switch to - only one Russian voice available
-  return voices.find((v) => MALE_VOICE_NAME_HINTS.some((hint) => v.name.toLowerCase().includes(hint)));
+  const male = voices.find((v) => MALE_VOICE_NAME_HINTS.some((hint) => v.name.toLowerCase().includes(hint)));
+  if (male) return male;
+  const defaultVoice = voices.find((v) => v.default) || voices[0];
+  return voices.find((v) => v !== defaultVoice);
 }
 
 // 'left' is always the other person in a dialogue (waiter, cashier, staff,
@@ -68,7 +73,7 @@ function findMaleVoice(lang) {
 // unchanged from before this feature existed.
 function pickVoice(lang, side) {
   if (side !== 'left') return undefined;
-  return findMaleVoice(lang);
+  return findAlternateVoice(lang);
 }
 
 function pickPitch(side) {

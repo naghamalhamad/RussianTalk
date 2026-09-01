@@ -200,27 +200,32 @@ every use of audio in the app stays in sync.
 (`'left'` for the other person — waiter, cashier, staff, friend...;
 `'right'` for "You," the learner's own line). `speech.js` uses this to
 make the `'left'` role sound different from `'right'` in three
-layered ways, from most to least reliable:
+layered ways, from most to least impactful:
 
-- **Rate**: `'left'` lines play distinctly slower
-  (`LEFT_ROLE_RATE = 0.68`) than `'right'` (the normal
-  `SPEECH_RATE = 0.8`). Rate is the one lever that reliably comes
-  through even on browsers whose Russian voice is a network/cloud
-  voice rather than one installed locally.
+- **A distinct voice, whether or not it has a "male" name**
+  (`findAlternateVoice()`): first tries a name match against a male
+  hint list (e.g. "Pavel," "Dmitri" - there's no gender field on a Web
+  Speech voice, so this part is always just a best-effort guess). If
+  that finds nothing, it now falls back to simply using *any other*
+  installed Russian voice, regardless of what it's named. This
+  fallback exists because on a real device with two Russian voices
+  that are both generically named (e.g. both just "Google русский" or
+  "Russian 1"/"Russian 2"), the name-match-only version found neither
+  and left both roles on the identical voice - confirmed live, then
+  fixed by no longer requiring a gender-sounding name to use a second
+  voice that's actually there. A real second voice model is the
+  strongest, most convincing difference available; nothing else here
+  gets close.
+- **Rate**: `'left'` lines also play distinctly slower
+  (`LEFT_ROLE_RATE = 0.62`) than `'right'` (the normal
+  `SPEECH_RATE = 0.8`) - the one lever that reliably comes through
+  even when there's only one Russian voice at all, including on a
+  network/cloud voice rather than one installed locally.
 - **Pitch**: `'left'` lines also play at a distinctly lower pitch
-  (`LEFT_ROLE_PITCH = 0.55`) than `'right'` (`pitch: 1`). Pitch was
-  tried *alone* first (no rate change) and a live check on a real
-  deployed build showed no audible difference at all — some browsers'
-  network Russian voice appears to silently ignore pitch. Rate was
-  added specifically because of that, so don't remove the rate change
-  and go back to pitch-only.
-- **A distinct voice (a bonus, not guaranteed)**: `findMaleVoice()`
-  also tries to switch `'left'` to a different, male-sounding
-  installed Russian voice by name (there's no gender field on a Web
-  Speech voice, so this is a best-effort match, e.g. "Pavel,"
-  "Dmitri"). This alone was tried even earlier and also didn't work —
-  most devices (phones especially) ship exactly one Russian voice, so
-  there's nothing to switch to.
+  (`LEFT_ROLE_PITCH = 0.4`) than `'right'` (`pitch: 1`). Weakest of
+  the three - some browsers' network Russian voice appears to
+  silently ignore pitch entirely - but still applied every time as a
+  bonus in case the engine does honor it.
 
 `'right'` lines, and anything with no side at all (a saved flashcard,
 which has no "other role"), always keep the browser's default rate,
@@ -231,13 +236,19 @@ forwards a `side` prop the same way it already forwards `text`/`label`.
 **Honest limitation that's still real**: this sandbox has no actual
 text-to-speech engine to listen to, so every change here was verified
 by inspecting the `rate`/`pitch`/`voice` values handed to
-`SpeechSynthesisUtterance`, not by hearing the result - confirming the
-*app* is asking for something different is not the same as confirming
-every browser's speech engine *renders* that request audibly, which is
-exactly the gap that made the pitch-only version look fine here but
-not change anything on a real device. If a future change to this
-feature still doesn't sound different in real use after being verified
-this same way, suspect the same gap again, not the app's logic.
+`SpeechSynthesisUtterance` (with mocked voice lists standing in for
+real device configurations, including one modeling two same-named
+Russian voices), not by hearing the result. Confirming the *app* is
+asking for something different is not the same as confirming every
+browser's speech engine *renders* that request audibly - that gap is
+exactly what made a pitch-only version, then a pitch+rate version,
+both look correct here while a real device kept sounding identical.
+If a future change to this feature still doesn't sound different in
+real use after being verified this same way, suspect that same gap
+again before assuming the app's logic is wrong - and prioritize
+finding a genuinely different installed voice over tuning rate/pitch
+numbers further; a real second voice model is the only lever here
+that doesn't depend on the engine choosing to honor a numeric knob.
 
 **How the training quiz's audio button avoids flipping the card**:
 the "Train All" quiz (`TrainingModal.jsx`) shows one flip-able card at
