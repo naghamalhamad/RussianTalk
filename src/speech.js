@@ -6,14 +6,19 @@ let activeSequenceStop = null;
 const SPEECH_RATE = 0.8;
 const PAUSE_BETWEEN_SENTENCES_MS = 700;
 
-// A lower pitch for the 'left' role (the other person in a dialogue), so
-// the two roles sound different even when there's only one Russian voice
-// installed on the visitor's device - which is the common case (see
-// pickVoice below for why a *different installed voice* can't be counted
-// on). Pitch is a plain 0-2 dial every voice supports, so unlike hunting
-// for a second voice, this always has an audible effect.
-const LEFT_ROLE_PITCH = 0.75;
+// A lower pitch AND a slower pace for the 'left' role (the other person in
+// a dialogue), so the two roles sound different even when there's only one
+// Russian voice installed on the visitor's device - which is the common
+// case (see pickVoice below for why a *different installed voice* can't be
+// counted on). Two separate levers on purpose: some browsers render
+// Russian speech through a network voice that quietly ignores pitch
+// changes (a real, observed gap - it was tried alone first and a live
+// test showed no audible difference), so rate carries the difference on
+// its own if pitch doesn't take effect, instead of the feature silently
+// doing nothing again.
+const LEFT_ROLE_PITCH = 0.55;
 const DEFAULT_PITCH = 1;
+const LEFT_ROLE_RATE = 0.68;
 
 export function isSpeechSupported() {
   return typeof window !== 'undefined' && 'speechSynthesis' in window;
@@ -70,6 +75,10 @@ function pickPitch(side) {
   return side === 'left' ? LEFT_ROLE_PITCH : DEFAULT_PITCH;
 }
 
+function pickRate(side) {
+  return side === 'left' ? LEFT_ROLE_RATE : SPEECH_RATE;
+}
+
 function stopActiveSequence() {
   if (activeSequenceStop) {
     const stop = activeSequenceStop;
@@ -84,7 +93,7 @@ export function speak(text, { lang = 'ru-RU', side } = {}) {
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = lang;
-  utterance.rate = SPEECH_RATE;
+  utterance.rate = pickRate(side);
   utterance.pitch = pickPitch(side);
   const voice = pickVoice(lang, side);
   if (voice) utterance.voice = voice;
@@ -135,7 +144,7 @@ export function speakSequence(items, { lang = 'ru-RU', onStepStart, onDone } = {
     const item = items[i];
     const utterance = new SpeechSynthesisUtterance(item.text);
     utterance.lang = lang;
-    utterance.rate = SPEECH_RATE;
+    utterance.rate = pickRate(item.side);
     utterance.pitch = pickPitch(item.side);
     const voice = pickVoice(lang, item.side);
     if (voice) utterance.voice = voice;

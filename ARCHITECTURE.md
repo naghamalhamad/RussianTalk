@@ -199,36 +199,45 @@ every use of audio in the app stays in sync.
 **Differentiating the two roles**: every dialog line has a `side`
 (`'left'` for the other person — waiter, cashier, staff, friend...;
 `'right'` for "You," the learner's own line). `speech.js` uses this to
-make the `'left'` role sound different from `'right'` in two ways:
+make the `'left'` role sound different from `'right'` in three
+layered ways, from most to least reliable:
 
-- **Pitch (the reliable one)**: `'left'` lines play at `pitch: 0.75`
-  (lower/deeper), `'right'` lines at the normal `pitch: 1`. Every
-  voice supports pitch, so this always has an audible effect,
-  regardless of what's installed on the visitor's device.
+- **Rate**: `'left'` lines play distinctly slower
+  (`LEFT_ROLE_RATE = 0.68`) than `'right'` (the normal
+  `SPEECH_RATE = 0.8`). Rate is the one lever that reliably comes
+  through even on browsers whose Russian voice is a network/cloud
+  voice rather than one installed locally.
+- **Pitch**: `'left'` lines also play at a distinctly lower pitch
+  (`LEFT_ROLE_PITCH = 0.55`) than `'right'` (`pitch: 1`). Pitch was
+  tried *alone* first (no rate change) and a live check on a real
+  deployed build showed no audible difference at all — some browsers'
+  network Russian voice appears to silently ignore pitch. Rate was
+  added specifically because of that, so don't remove the rate change
+  and go back to pitch-only.
 - **A distinct voice (a bonus, not guaranteed)**: `findMaleVoice()`
   also tries to switch `'left'` to a different, male-sounding
   installed Russian voice by name (there's no gender field on a Web
   Speech voice, so this is a best-effort match, e.g. "Pavel,"
-  "Dmitri"). **This was tried alone first and didn't work in
-  practice** — most devices (phones especially) ship exactly one
-  Russian voice, so there's nothing to switch to, and both roles kept
-  sounding identical. Pitch was added specifically to fix that; don't
-  remove the pitch adjustment and rely on voice-matching alone again.
+  "Dmitri"). This alone was tried even earlier and also didn't work —
+  most devices (phones especially) ship exactly one Russian voice, so
+  there's nothing to switch to.
 
 `'right'` lines, and anything with no side at all (a saved flashcard,
-which has no "other role"), always keep the browser's default voice
-and pitch — unchanged from before this feature existed. `speak()` and
-`speakSequence()` both take a `side`, and `SpeakerButton` forwards a
-`side` prop the same way it already forwards `text`/`label`.
+which has no "other role"), always keep the browser's default rate,
+pitch, and voice — unchanged from before this feature existed.
+`speak()` and `speakSequence()` both take a `side`, and `SpeakerButton`
+forwards a `side` prop the same way it already forwards `text`/`label`.
 
-**Honest limitation that's still real**: even with pitch guaranteeing
-*some* audible difference, whether the app also finds a genuinely
-different-sounding voice still depends on the visitor's device — this
-isn't a bug to chase, there is nothing this app can install on
-someone else's device. If you touch `MALE_VOICE_NAME_HINTS` in
-`speech.js`, keep in mind it's a plain substring match against
-whatever the OS/browser happens to name its voices — there's no
-reliable "ask the browser for a male voice" API to use instead.
+**Honest limitation that's still real**: this sandbox has no actual
+text-to-speech engine to listen to, so every change here was verified
+by inspecting the `rate`/`pitch`/`voice` values handed to
+`SpeechSynthesisUtterance`, not by hearing the result - confirming the
+*app* is asking for something different is not the same as confirming
+every browser's speech engine *renders* that request audibly, which is
+exactly the gap that made the pitch-only version look fine here but
+not change anything on a real device. If a future change to this
+feature still doesn't sound different in real use after being verified
+this same way, suspect the same gap again, not the app's logic.
 
 **How the training quiz's audio button avoids flipping the card**:
 the "Train All" quiz (`TrainingModal.jsx`) shows one flip-able card at
