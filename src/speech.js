@@ -6,6 +6,15 @@ let activeSequenceStop = null;
 const SPEECH_RATE = 0.8;
 const PAUSE_BETWEEN_SENTENCES_MS = 700;
 
+// A lower pitch for the 'left' role (the other person in a dialogue), so
+// the two roles sound different even when there's only one Russian voice
+// installed on the visitor's device - which is the common case (see
+// pickVoice below for why a *different installed voice* can't be counted
+// on). Pitch is a plain 0-2 dial every voice supports, so unlike hunting
+// for a second voice, this always has an audible effect.
+const LEFT_ROLE_PITCH = 0.75;
+const DEFAULT_PITCH = 1;
+
 export function isSpeechSupported() {
   return typeof window !== 'undefined' && 'speechSynthesis' in window;
 }
@@ -29,9 +38,12 @@ if (isSpeechSupported()) {
 
 // The Web Speech API doesn't expose a voice's gender, so picking a "male"
 // voice is a best-effort name match against whatever voices the visitor's
-// own device happens to have installed - the same "depends on the device,
-// not the app" limitation as Russian voice support itself (see
-// ARCHITECTURE.md, "How Audio Playback Works").
+// own device happens to have installed. In practice this rarely finds
+// anything - most devices (phones especially) ship exactly one Russian
+// voice, so there's no second voice to switch to no matter how good the
+// name match is. That's why LEFT_ROLE_PITCH above, not this, is what
+// actually guarantees the two roles sound different; this is just a nice
+// bonus on the minority of devices that do have more than one.
 const MALE_VOICE_NAME_HINTS = [
   'male', 'yuri', 'yury', 'pavel', 'dmitri', 'dmitry', 'ivan', 'sergei', 'sergey',
   'boris', 'nikolai', 'mikhail', 'aleksei', 'alexei', 'maxim',
@@ -40,19 +52,22 @@ const MALE_VOICE_NAME_HINTS = [
 function findMaleVoice(lang) {
   const langPrefix = lang.slice(0, 2).toLowerCase();
   const voices = loadVoices().filter((v) => v.lang?.toLowerCase().startsWith(langPrefix));
+  if (voices.length < 2) return undefined; // nothing to switch to - only one Russian voice available
   return voices.find((v) => MALE_VOICE_NAME_HINTS.some((hint) => v.name.toLowerCase().includes(hint)));
 }
 
 // 'left' is always the other person in a dialogue (waiter, cashier, staff,
-// friend...); 'right' is always "You," the learner's own line. Only the
-// 'left' role gets a specifically-picked voice, so the two roles sound
-// different wherever the visitor's device has a male Russian voice
-// installed. 'right', and anything with no side at all (a single saved
-// flashcard, a popover word with no line context), keeps whatever voice
-// the browser already uses by default - unchanged from before.
+// friend...); 'right' is always "You," the learner's own line. 'right',
+// and anything with no side at all (a saved flashcard, a popover word
+// with no line context), always gets the default voice and pitch -
+// unchanged from before this feature existed.
 function pickVoice(lang, side) {
   if (side !== 'left') return undefined;
   return findMaleVoice(lang);
+}
+
+function pickPitch(side) {
+  return side === 'left' ? LEFT_ROLE_PITCH : DEFAULT_PITCH;
 }
 
 function stopActiveSequence() {
@@ -70,6 +85,7 @@ export function speak(text, { lang = 'ru-RU', side } = {}) {
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = lang;
   utterance.rate = SPEECH_RATE;
+  utterance.pitch = pickPitch(side);
   const voice = pickVoice(lang, side);
   if (voice) utterance.voice = voice;
   window.speechSynthesis.speak(utterance);
@@ -120,6 +136,7 @@ export function speakSequence(items, { lang = 'ru-RU', onStepStart, onDone } = {
     const utterance = new SpeechSynthesisUtterance(item.text);
     utterance.lang = lang;
     utterance.rate = SPEECH_RATE;
+    utterance.pitch = pickPitch(item.side);
     const voice = pickVoice(lang, item.side);
     if (voice) utterance.voice = voice;
     utterance.onend = () => {
